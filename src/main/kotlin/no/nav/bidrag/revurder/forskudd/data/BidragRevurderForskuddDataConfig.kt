@@ -1,13 +1,13 @@
 package no.nav.bidrag.revurder.forskudd.data
 
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
 import no.nav.bidrag.commons.CorrelationId
 import no.nav.bidrag.commons.ExceptionLogger
 import no.nav.bidrag.commons.security.api.EnableSecurityConfiguration
 import no.nav.bidrag.commons.security.service.SecurityTokenService
 import no.nav.bidrag.commons.web.CorrelationIdFilter
 import no.nav.bidrag.commons.web.HttpHeaderRestTemplate
-import no.nav.bidrag.revurder.forskudd.data.consumer.BidragVedtakConsumer
-import no.nav.bidrag.revurder.forskudd.data.consumer.DefaultBidragVedtakConsumer
+import no.nav.bidrag.revurder.forskudd.data.client.VedtakClientImpl
 import no.nav.bidrag.revurder.forskudd.data.hendelse.KafkaVedtakHendelseListener
 import no.nav.bidrag.revurder.forskudd.data.service.BehandleHendelseService
 import no.nav.bidrag.revurder.forskudd.data.service.JsonMapperService
@@ -54,16 +54,16 @@ class BidragRevurderForskuddDataConfig {
   }
 
   @Bean
-  fun bidragVedtakConsumer(
+  fun vedtakClient(
     @Value("\${VEDTAK_URL}") url: String,
     restTemplate: HttpHeaderRestTemplate,
     securityTokenService: SecurityTokenService,
     exceptionLogger: ExceptionLogger
-  ): BidragVedtakConsumer {
+  ): VedtakClient {
     LOGGER.info("Url satt i config: $url")
     restTemplate.uriTemplateHandler = RootUriTemplateHandler(url)
     restTemplate.interceptors.add(securityTokenService.serviceUserAuthTokenInterceptor("bidragvedtak"))
-    return DefaultBidragVedtakConsumer(restTemplate)
+    return VedtakClientImpl(restTemplate)
   }
 }
 

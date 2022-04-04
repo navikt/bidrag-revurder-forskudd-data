@@ -25,6 +25,7 @@
     <bidrag-commons-test.version>0.2.2</bidrag-commons-test.version>
     <bidrag-tilgangskontroll.version>1.9.20</bidrag-tilgangskontroll.version>
     <bidrag-behandling-felles.version>0.0.9</bidrag-behandling-felles.version>
+    <bidrag-behandling-felles-dto.version>0.0.8</bidrag-behandling-felles-dto.version>
     <token-support.version>2.0.8</token-support.version>
     <build-helper-maven.version>3.2.0</build-helper-maven.version>
     <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
@@ -121,6 +122,11 @@
       <groupId>no.nav.bidrag</groupId>
       <artifactId>bidrag-behandling-felles</artifactId>
       <version>${bidrag-behandling-felles.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>no.nav.bidrag</groupId>
+      <artifactId>bidrag-behandling-felles-dto</artifactId>
+      <version>${bidrag-behandling-felles-dto.version}</version>
     </dependency>
     <dependency>
       <groupId>no.nav.bidrag</groupId>

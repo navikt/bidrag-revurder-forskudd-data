@@ -1,5 +1,10 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
+import no.nav.bidrag.behandling.felles.dto.vedtak.GrunnlagDto
+import no.nav.bidrag.behandling.felles.dto.vedtak.StonadsendringDto
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakDto
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakPeriodeDto
 import no.nav.bidrag.behandling.felles.enums.BostatusKode
 import no.nav.bidrag.behandling.felles.enums.GrunnlagType
 import no.nav.bidrag.behandling.felles.enums.Rolle
@@ -7,11 +12,6 @@ import no.nav.bidrag.behandling.felles.enums.SivilstandKode
 import no.nav.bidrag.behandling.felles.enums.StonadType
 import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
-import no.nav.bidrag.revurder.forskudd.data.consumer.BidragVedtakConsumer
-import no.nav.bidrag.revurder.forskudd.data.consumer.api.HentGrunnlagResponse
-import no.nav.bidrag.revurder.forskudd.data.consumer.api.HentPeriodeResponse
-import no.nav.bidrag.revurder.forskudd.data.consumer.api.HentStonadsendringResponse
-import no.nav.bidrag.revurder.forskudd.data.consumer.api.HentVedtakResponse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import org.assertj.core.api.Assertions.assertThat
@@ -42,7 +42,7 @@ internal class BehandleHendelseServiceMockTest {
   private lateinit var aktivtVedtakServiceMock: AktivtVedtakService
 
   @Mock
-  private lateinit var vedtakConsumerMock: BidragVedtakConsumer
+  private lateinit var vedtakClientMock: VedtakClient
 
   @Captor
   private lateinit var nyttAktivtVedtakCaptor: ArgumentCaptor<AktivtVedtakBo>
@@ -70,8 +70,8 @@ internal class BehandleHendelseServiceMockTest {
     whenever(aktivtVedtakServiceMock.opprettNyttAktivtVedtak(MockitoHelper.capture(nyttAktivtVedtakCaptor))).thenReturn(1)
 
     // Simulerer vedtak returnert fra bidrag-vedtak
-    whenever(vedtakConsumerMock.hentVedtak(any())).thenReturn(
-      HentVedtakResponse(
+    whenever(vedtakClientMock.hentVedtak(any())).thenReturn(
+      VedtakDto(
         vedtakId = vedtakId,
         vedtakType = vedtakType,
         opprettetAv = "",
@@ -79,7 +79,7 @@ internal class BehandleHendelseServiceMockTest {
         enhetId = "",
         opprettetTimestamp = dateTimeNow,
         listOf(
-          HentGrunnlagResponse(
+          GrunnlagDto(
             grunnlagId = 1,
             referanse = "Mottatt_Sivilstand",
             type = GrunnlagType.SIVILSTAND,
@@ -90,7 +90,7 @@ internal class BehandleHendelseServiceMockTest {
         "sivilstandKode": "$sivilstandkode"
       }"""
           ),
-          HentGrunnlagResponse(
+          GrunnlagDto(
             grunnlagId = 2,
             referanse = "Mottatt_Bostatus",
             type = GrunnlagType.BOSTATUS,
@@ -101,7 +101,7 @@ internal class BehandleHendelseServiceMockTest {
         "bostatusKode": "$bostatuskode"
       }"""
           ),
-          HentGrunnlagResponse(
+          GrunnlagDto(
             grunnlagId = 3,
             referanse = "Mottatt_Barn",
             type = GrunnlagType.BARN,
@@ -112,7 +112,7 @@ internal class BehandleHendelseServiceMockTest {
           ),
         ),
         listOf(
-          HentStonadsendringResponse(
+          StonadsendringDto(
             stonadType = StonadType.FORSKUDD,
             sakId = "SAK-001",
             behandlingId = "",
@@ -120,7 +120,7 @@ internal class BehandleHendelseServiceMockTest {
             kravhaverId = "54321",
             mottakerId = "24680",
             listOf(
-              HentPeriodeResponse(
+              VedtakPeriodeDto(
                 periodeFomDato = LocalDate.now(),
                 periodeTilDato = null,
                 belop = BigDecimal.ZERO,
@@ -130,7 +130,9 @@ internal class BehandleHendelseServiceMockTest {
               )
             )
           )
-        )
+        ),
+        emptyList(),
+        emptyList()
       )
     )
 

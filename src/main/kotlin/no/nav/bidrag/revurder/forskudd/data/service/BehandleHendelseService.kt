@@ -1,11 +1,11 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
+import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakDto
 import no.nav.bidrag.behandling.felles.enums.GrunnlagType
 import no.nav.bidrag.behandling.felles.enums.StonadType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
-import no.nav.bidrag.revurder.forskudd.data.consumer.BidragVedtakConsumer
-import no.nav.bidrag.revurder.forskudd.data.consumer.api.HentVedtakResponse
 import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
 import no.nav.bidrag.revurder.forskudd.data.dto.NyttAktivtVedtakRequestDto
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
@@ -25,7 +25,7 @@ interface BehandleHendelseService {
 @Service
 class DefaultBehandleHendelseService(
   private val aktivtVedtakService: AktivtVedtakService,
-  private val bidragVedtakConsumer: BidragVedtakConsumer
+  private val vedtakClient: VedtakClient
 ) : BehandleHendelseService {
 
   override fun behandleHendelse(vedtakHendelse: VedtakHendelse) {
@@ -76,10 +76,10 @@ class DefaultBehandleHendelseService(
   // Henter data fra bidrag-vedtak. Dette er data som ikke er del av VedtakHendelse.
   private fun hentBidragVedtakData(vedtakId: Int): BidragVedtakData {
     //TODO Feilhåndtering
-    return mapResponsTilInternStruktur(bidragVedtakConsumer.hentVedtak(vedtakId))
+    return mapResponsTilInternStruktur(vedtakClient.hentVedtak(vedtakId))
   }
 
-  private fun mapResponsTilInternStruktur(hentVedtakResponse: HentVedtakResponse): BidragVedtakData {
+  private fun mapResponsTilInternStruktur(hentVedtakResponse: VedtakDto): BidragVedtakData {
     val stonadsendring = hentVedtakResponse.stonadsendringListe.first { it.stonadType == StonadType.FORSKUDD }
     val periode = stonadsendring.periodeListe.first { it.periodeTilDato == null }
     val grunnlagReferanseListe = periode.grunnlagReferanseListe
