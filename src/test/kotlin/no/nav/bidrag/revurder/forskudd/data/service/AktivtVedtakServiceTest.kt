@@ -20,8 +20,8 @@ import java.time.format.DateTimeFormatter
 
 
 @DisplayName("aktivtVedtakServiceTest")
-@ActiveProfiles(PROFILE_TEST)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
+@ActiveProfiles(PROFILE_TEST)
 class AktivtVedtakServiceTest {
 
   @Autowired

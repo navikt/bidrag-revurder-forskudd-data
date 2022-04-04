@@ -2,16 +2,14 @@ package no.nav.bidrag.revurder.forskudd.data
 
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@ExtendWith(SpringExtension::class)
+@DisplayName("BidragRevurderForskuddData")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
 @ActiveProfiles(PROFILE_TEST)
-@DisplayName("BidragRevurderForskuddData")
+//@ExtendWith(SpringExtension::class)
 class BidragRevurderForskuddDataApplicationTest {
 
   @Test
