@@ -18,7 +18,6 @@ import org.junit.jupiter.api.function.Executable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -28,9 +27,9 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.util.UriComponentsBuilder
 
 @DisplayName("AktivtVedtakControllerTest")
-@ActiveProfiles(PROFILE_TEST)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
-@AutoConfigureWireMock(port = 0)
+@ActiveProfiles(PROFILE_TEST)
+//@AutoConfigureWireMock(port = 0)
 class AktivtVedtakControllerTest {
 
   @Autowired

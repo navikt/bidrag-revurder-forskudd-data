@@ -18,8 +18,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
 @DisplayName("VedtakHendelseListener (test av forretningslogikk)")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
 @ActiveProfiles(PROFILE_TEST)
 internal class VedtakHendelseListenerTest {
 

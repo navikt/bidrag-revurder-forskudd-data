@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
-const val PROFILE_KAFKA_TEST = "kafka_test"
 const val PROFILE_TEST = "test"
 
 @Configuration
