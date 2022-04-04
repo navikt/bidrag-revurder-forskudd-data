@@ -10,9 +10,9 @@ spec:
     application:
       enabled: true
   accessPolicy:
-    inbound:
-      rules:
-        - application: {{ name }}
+    outbound:
+      external:
+        - host: {{ azure.vedtak_url }}
   image: {{ image }}
   kafka:
     pool: {{ kafka.pool }}
@@ -40,11 +40,17 @@ spec:
     - {{ ingress }}
   gcp:
     sqlInstances:
-      - name: {{ dbname }}
-        type: POSTGRES_12
+      - name: {{ database.dbname }}
+        type: POSTGRES_14
+        diskAutoresize: {{ database.autoResize }}
         databases:
-          - name: {{ dbname }}
+          - name: {{ database.dbname }}
             envVarPrefix: DB
   env:
     - name: TOPIC_VEDTAK
       value: {{ kafka-topic-vedtak }}
+    - name: VEDTAK_URL
+      value: https://{{ azure.vedtak_url }}
+    - name: VEDTAK_SCOPE
+      value: https://{{ azure.vedtak_scope }}
+

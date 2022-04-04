@@ -1,6 +1,11 @@
-name: bidrag-stonad
-ingress: https://bidrag-stonad.intern.nav.no
-dbname: bidrag-stonad-prod
+name: bidrag-revurder-forskudd-data
+ingress: https://bidrag-revurder-forskudd-data.intern.nav.no
+azure:
+  vedtak_url: bidrag-vedtak.intern.nav.no
+  vedtak_scope: prod-gcp.bidrag.bidrag-vedtak
+database:
+  dbname: bidrag-revurder-forskudd-data-prod
+  autoResize: true
 kafka:
   pool: nav-prod
 kafka-topic-vedtak: bidrag.vedtak

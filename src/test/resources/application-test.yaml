@@ -1,0 +1,35 @@
+VEDTAK_URL: http://localhost:${wiremock.server.port:0}/vedtak
+TOPIC_VEDTAK: topic_vedtak
+KAFKA_BROKERS: localhost:9092
+
+---
+
+no.nav.security.jwt:
+  client:
+    registration:
+      bidragvedtak:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port:1234}/aad/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: api://123/.default
+        authentication:
+          client-id: 123
+          client-secret: 123
+          client-auth-method: client_secret_basic
+
+---
+
+spring:
+  flyway.enabled: false
+  datasource.type: com.zaxxer.hikari.HikariDataSource
+  datasource.url: jdbc:h2:mem:default
+  h2.console.enabled: true
+  jpa.hibernate.hbmddl-auto: create-drop
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS}
+    properties:
+      security.protocol: PLAINTEXT
+    consumer:
+      auto-offset-reset: earliest
+      enableAutoCommit: false
+    listener:
+      ackMode: RECORD

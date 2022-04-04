@@ -1,0 +1,20 @@
+VEDTAK_URL: https://bidrag-vedtak.dev.intern.nav.no
+TOPIC_VEDTAK: topic_vedtak
+KAFKA_BROKERS: localhost:9092
+
+---
+
+spring:
+  flyway.enabled: false
+  datasource.type: com.zaxxer.hikari.HikariDataSource
+  datasource.url: jdbc:h2:mem:default
+  h2.console.enabled: true
+  jpa.hibernate.hbmddl-auto: create-drop
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS}
+    properties:
+      security.protocol: PLAINTEXT
+    consumer:
+      enableAutoCommit: false
+    listener:
+      ackMode: RECORD

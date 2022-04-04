@@ -1,8 +1,6 @@
-####################################################################
-#
-# Profiles: All
-#
-####################################################################
+server:
+  servlet:
+    context-path: /bidrag-revurder-forskudd-data
 
 management:
   endpoints:
@@ -12,15 +10,8 @@ management:
 
 ---
 
-####################################################################
-# Profile: live
-#----------------------------
-#
-# Live token-support properties.
-#
-####################################################################
-
 spring:
+  config.activate.on-profile: nais
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
     properties:
@@ -34,10 +25,29 @@ spring:
           location: ${KAFKA_TRUSTSTORE_PATH}
           password: ${KAFKA_CREDSTORE_PASSWORD}
         endpoint.identification.algorithm:
-        producer:
-          key-serializer: org.apache.kafka.common.serialization.StringSerializer
-          value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      enableAutoCommit: false
+    listener:
+      ackMode: RECORD
 
+---
+
+spring.config.activate.on-profile: live
+no.nav.security.jwt:
+  client:
+    registration:
+      bidragvedtak:
+        token-endpoint-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: api://${VEDTAK_SCOPE}/.default
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
+---
+
+spring:
   config.activate.on-profile: live
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
@@ -54,39 +64,3 @@ spring:
   jpa:
     hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
     database: postgresql
-
-# OIDC
-no.nav.security.jwt:
-  issuer:
-    aad:
-      discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-      accepted_audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-
----
-
-####################################################################
-# Profile: test
-#----------------------------
-#
-# Properties for unit testing and local runs.
-# Mocks OIDC.
-#
-####################################################################
-
-spring.config.activate.on-profile: test
-
-no.nav.security.jwt:
-  issuer:
-    aad:
-      discovery_url: http://metadata
-      accepted_audience: aud-localhost
-      cookie_name: localhost-idtoken
-
-spring:
-  config.activate.on-profile: test, local
-  flyway.enabled: false
-  datasource.type: com.zaxxer.hikari.HikariDataSource
-  datasource.url: jdbc:h2:mem:default
-#  datasource.url: jdbc:h2:file:/Users/R153961/Dev/bidrag-stonad/src/main/resources/data
-  h2.console.enabled: true
-  jpa.hibernate.hbmddl-auto: create-drop
