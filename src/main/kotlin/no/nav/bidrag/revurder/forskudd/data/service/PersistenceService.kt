@@ -15,9 +15,10 @@ class PersistenceService(val aktivtVedtakRepository: AktivtVedtakRepository) {
     return aktivtVedtak.toAktivtVedtakBo()
   }
 
-  fun oppdaterAktivtVedtak(aktivtVedtakId: Int) { //, endretAvSaksbehandlerId: String) {
-    //TODO
-//    aktivtVedtakRepository.oppdaterAktivtVedtakMedEndretAvSaksbehandlerIdOgTimestamp(aktivtVedtakId)
+  fun oppdaterAktivtVedtak(aktivtVedtakBo: AktivtVedtakBo): AktivtVedtakBo {
+    val oppdatertAktivtVedtak = aktivtVedtakBo.toAktivtVedtakEntity()
+    val aktivtVedtak = aktivtVedtakRepository.save(oppdatertAktivtVedtak)
+    return aktivtVedtak.toAktivtVedtakBo()
   }
 
   fun slettAktivtVedtak(aktivtVedtakId: Int) {
