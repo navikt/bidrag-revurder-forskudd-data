@@ -31,25 +31,40 @@ internal class VedtakHendelseListenerTest {
 
   @Test
   fun `skal lese og behandle vedtakshendelse`() {
+
+    val vedtakId = 1
+    val vedtakType = VedtakType.MANUELT
+    val stonadType = StonadType.FORSKUDD
+    val sakId = "SAK-001"
+    val skyldnerId = "13579"
+    val kravhaverId = "54321"
+    val mottakerId = "24680"
+    val opprettetAv = "TEST"
+    val opprettetTimestamp = LocalDateTime.now()
+    val periodeFom = LocalDate.now()
+    val belop = BigDecimal.valueOf(100)
+    val valutakode = "NOK"
+    val resultatkode = "RESULTATKODE"
+
     vedtakHendelseListener.lesHendelse(
       """
             {
-              "vedtakId":1,
-              "vedtakType":"MANUELT",
-              "stonadType":"FORSKUDD",
-              "sakId":"1",
-              "skyldnerId":"1",
-              "kravhaverId":"1",
-              "mottakerId":"1",
-              "opprettetAv":"TEST",
-              "opprettetTimestamp":"2022-01-11T10:00:00.000001",
+              "vedtakId": $vedtakId,
+              "vedtakType": "$vedtakType",
+              "stonadType": "$stonadType",
+              "sakId": "$sakId",
+              "skyldnerId": "$skyldnerId",
+              "kravhaverId": "$kravhaverId",
+              "mottakerId": "$mottakerId",
+              "opprettetAv": "$opprettetAv",
+              "opprettetTimestamp": "$opprettetTimestamp",
               "periodeListe":[
                 {
-                  "periodeFom":"2021-01-01",
-                  "periodeTil":"2022-01-01",
-                  "belop":0,
-                  "valutakode":"NOK",
-                  "resultatkode":"AVSLAG"
+                  "periodeFom": "$periodeFom",
+                  "periodeTil": null,
+                  "belop": $belop,
+                  "valutakode": "$valutakode",
+                  "resultatkode": "$resultatkode"
                 }
               ]
             }
@@ -59,22 +74,22 @@ internal class VedtakHendelseListenerTest {
     //TODO Sjekke på sporingsdata?
     verify(behandleHendelseServiceMock).behandleHendelse(
       VedtakHendelse(
-        vedtakId = 1,
-        vedtakType = VedtakType.MANUELT,
-        stonadType = StonadType.FORSKUDD,
-        sakId = "1",
-        skyldnerId = "1",
-        kravhaverId = "1",
-        mottakerId = "1",
-        opprettetAv = "TEST",
-        opprettetTimestamp = LocalDateTime.parse("2022-01-11T10:00:00.000001"),
+        vedtakId = vedtakId,
+        vedtakType = vedtakType,
+        stonadType = stonadType,
+        sakId = sakId,
+        skyldnerId = skyldnerId,
+        kravhaverId = kravhaverId,
+        mottakerId = mottakerId,
+        opprettetAv = opprettetAv,
+        opprettetTimestamp = opprettetTimestamp,
         periodeListe = listOf(
           VedtakHendelsePeriode(
-            periodeFom = LocalDate.parse("2021-01-01"),
-            periodeTil = LocalDate.parse("2022-01-01"),
-            belop = BigDecimal.ZERO,
-            valutakode = "NOK",
-            resultatkode = "AVSLAG"
+            periodeFom = periodeFom,
+            periodeTil = null,
+            belop = belop,
+            valutakode = valutakode,
+            resultatkode = resultatkode
           )
         )
       )

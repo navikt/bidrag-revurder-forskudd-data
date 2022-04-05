@@ -1,5 +1,8 @@
 package no.nav.bidrag.revurder.forskudd.data
 
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import no.nav.bidrag.revurder.forskudd.data.dto.NyttAktivtVedtakRequestDto
 import java.math.BigDecimal
@@ -17,13 +20,13 @@ class TestUtil {
       mottakerId = "01018211111",
       vedtakDatoSisteVedtak = LocalDate.parse("2020-01-01"),
       vedtakDatoSisteManuelleVedtak = LocalDate.parse("2020-01-01"),
-      vedtakType = "MANUELL",
+      vedtakType = VedtakType.MANUELT,
       belop = BigDecimal.valueOf(3490),
       valutakode = "NOK",
       resultatkode = "FORHOYET_FORSKUDD_100_PROSENT",
-      mottakerSivilstandSisteManuelleVedtak = "GIFT",
+      mottakerSivilstandSisteManuelleVedtak = SivilstandKode.GIFT,
       mottakerAntallBarnSisteManuelleVedtak = 2,
-      soknadsbarnBostedsstatus = "MED_FORELDRE",
+      soknadsbarnBostedsstatus = BostatusKode.MED_FORELDRE,
       soknadsbarnFodselsdato = LocalDate.parse("2015-01-01"),
       soknadsbarnHarUnntakskode = false
     )
@@ -36,13 +39,13 @@ class TestUtil {
       mottakerId = "01018211111",
       vedtakDatoSisteVedtak = LocalDate.parse("2020-01-01"),
       vedtakDatoSisteManuelleVedtak = LocalDate.parse("2020-01-01"),
-      vedtakType = "MANUELL",
+      vedtakType = VedtakType.MANUELT,
       belop = BigDecimal.valueOf(3490),
       valutakode = "NOK",
       resultatkode = "FORHOYET_FORSKUDD_100_PROSENT",
-      mottakerSivilstandSisteManuelleVedtak = "GIFT",
+      mottakerSivilstandSisteManuelleVedtak = SivilstandKode.GIFT,
       mottakerAntallBarnSisteManuelleVedtak = 2,
-      soknadsbarnBostedsstatus = "MED_FORELDRE",
+      soknadsbarnBostedsstatus = BostatusKode.MED_FORELDRE,
       soknadsbarnFodselsdato = LocalDate.parse("2015-01-01"),
       soknadsbarnHarUnntakskode = false,
       opprettetTimestamp = LocalDateTime.now()

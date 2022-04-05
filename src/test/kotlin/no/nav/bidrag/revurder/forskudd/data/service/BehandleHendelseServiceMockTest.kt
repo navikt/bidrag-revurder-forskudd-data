@@ -16,6 +16,7 @@ import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,92 +50,13 @@ internal class BehandleHendelseServiceMockTest {
 
   @Test
   @Suppress("NonAsciiCharacters")
-  fun `skal opprette nytt aktivt vedtak fra VedtakHendelse`() {
-
-    val vedtakId = 1
-    val vedtakType = VedtakType.MANUELT
-    val sakId = "SAK-001"
-    val kravhaverId = "54321"
-    val mottakerId = "24680"
-    val belop = BigDecimal.valueOf(100)
-    val valutakode = "NOK"
-    val resultatkode = "RESULTATKODE"
-    val dateNow = LocalDate.now()
-    val dateTimeNow = LocalDateTime.now()
-    val sivilstandkode = SivilstandKode.GIFT.toString()
-    val bostatuskode = BostatusKode.MED_FORELDRE.toString()
-    val fodselsdato = "2006-02-01"
+  fun `skal opprette nytt aktivt vedtak basert på data fra VedtakHendelse`() {
 
     whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
-//    whenever(aktivtVedtakServiceMock.opprettNyttAktivtVedtak(MockitoHelper.capture(nyttAktivtVedtakCaptor))).thenReturn(NyttAktivtVedtakDto(1))
     whenever(aktivtVedtakServiceMock.opprettNyttAktivtVedtak(MockitoHelper.capture(nyttAktivtVedtakCaptor))).thenReturn(1)
 
     // Simulerer vedtak returnert fra bidrag-vedtak
-    whenever(vedtakClientMock.hentVedtak(any())).thenReturn(
-      VedtakDto(
-        vedtakId = vedtakId,
-        vedtakType = vedtakType,
-        opprettetAv = "",
-        vedtakDato = dateNow,
-        enhetId = "",
-        opprettetTimestamp = dateTimeNow,
-        listOf(
-          GrunnlagDto(
-            grunnlagId = 1,
-            referanse = "Mottatt_Sivilstand",
-            type = GrunnlagType.SIVILSTAND,
-            innhold = """{
-        "rolle": "${Rolle.BIDRAGSMOTTAKER}",
-        "datoFom": "$dateNow",
-        "datoTil": null,
-        "sivilstandKode": "$sivilstandkode"
-      }"""
-          ),
-          GrunnlagDto(
-            grunnlagId = 2,
-            referanse = "Mottatt_Bostatus",
-            type = GrunnlagType.BOSTATUS,
-            innhold = """{
-        "rolle": "${Rolle.SOKNADSBARN}",
-        "datoFom": "$dateNow",
-        "datoTil": null,
-        "bostatusKode": "$bostatuskode"
-      }"""
-          ),
-          GrunnlagDto(
-            grunnlagId = 3,
-            referanse = "Mottatt_Barn",
-            type = GrunnlagType.BARN,
-            innhold = """{
-        "rolle": "${Rolle.SOKNADSBARN}",
-        "fodselsdato": "$fodselsdato"
-      }"""
-          ),
-        ),
-        listOf(
-          StonadsendringDto(
-            stonadType = StonadType.FORSKUDD,
-            sakId = "SAK-001",
-            behandlingId = "",
-            skyldnerId = "12345",
-            kravhaverId = "54321",
-            mottakerId = "24680",
-            listOf(
-              VedtakPeriodeDto(
-                periodeFomDato = LocalDate.now(),
-                periodeTilDato = null,
-                belop = BigDecimal.ZERO,
-                valutakode = "NOK",
-                resultatkode = "RESULTAT",
-                grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
-              )
-            )
-          )
-        ),
-        emptyList(),
-        emptyList()
-      )
-    )
+    whenever(vedtakClientMock.hentVedtak(any())).thenReturn(lagVedtakDto())
 
     // Oppretter ny hendelse
     val nyHendelse = VedtakHendelse(
@@ -171,7 +93,9 @@ internal class BehandleHendelseServiceMockTest {
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow) },
+      Executable {
+        assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
+      },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.belop).`as`("belop").isEqualTo(belop) },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.valutakode).`as`("valutakode").isEqualTo(valutakode) },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.resultatkode).`as`("resultatkode").isEqualTo(resultatkode) },
@@ -190,6 +114,95 @@ internal class BehandleHendelseServiceMockTest {
           .isEqualTo(BidragVedtakData().soknadsbarnHarUnntakskode)
       }
     )
+  }
+
+  @Disabled
+  @Test
+  @Suppress("NonAsciiCharacters")
+  fun `skal oppdatere aktivt vedtak basert på data fra VedtakHendelse`() {
+
+  }
+
+  fun lagVedtakDto() =
+    VedtakDto(
+      vedtakId = vedtakId,
+      vedtakType = vedtakType,
+      opprettetAv = "",
+      vedtakDato = dateNow,
+      enhetId = "",
+      opprettetTimestamp = dateTimeNow,
+      listOf(
+        GrunnlagDto(
+          grunnlagId = 1,
+          referanse = "Mottatt_Sivilstand",
+          type = GrunnlagType.SIVILSTAND,
+          innhold = """{
+        "rolle": "${Rolle.BIDRAGSMOTTAKER}",
+        "datoFom": "$dateNow",
+        "datoTil": null,
+        "sivilstandKode": "$sivilstandkode"
+      }"""
+        ),
+        GrunnlagDto(
+          grunnlagId = 2,
+          referanse = "Mottatt_Bostatus",
+          type = GrunnlagType.BOSTATUS,
+          innhold = """{
+        "rolle": "${Rolle.SOKNADSBARN}",
+        "datoFom": "$dateNow",
+        "datoTil": null,
+        "bostatusKode": "$bostatuskode"
+      }"""
+        ),
+        GrunnlagDto(
+          grunnlagId = 3,
+          referanse = "Mottatt_Barn",
+          type = GrunnlagType.BARN,
+          innhold = """{
+        "rolle": "${Rolle.SOKNADSBARN}",
+        "fodselsdato": "$fodselsdato"
+      }"""
+        ),
+      ),
+      listOf(
+        StonadsendringDto(
+          stonadType = StonadType.FORSKUDD,
+          sakId = "SAK-001",
+          behandlingId = "",
+          skyldnerId = "12345",
+          kravhaverId = "54321",
+          mottakerId = "24680",
+          listOf(
+            VedtakPeriodeDto(
+              periodeFomDato = LocalDate.now(),
+              periodeTilDato = null,
+              belop = BigDecimal.ZERO,
+              valutakode = "NOK",
+              resultatkode = "RESULTAT",
+              grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
+            )
+          )
+        )
+      ),
+      emptyList(),
+      emptyList()
+    )
+
+  companion object {
+
+    val vedtakId = 1
+    val vedtakType = VedtakType.MANUELT
+    val sakId = "SAK-001"
+    val kravhaverId = "54321"
+    val mottakerId = "24680"
+    val belop = BigDecimal.valueOf(100)
+    val valutakode = "NOK"
+    val resultatkode = "RESULTATKODE"
+    val dateNow = LocalDate.now()
+    val dateTimeNow = LocalDateTime.now()
+    val sivilstandkode = SivilstandKode.GIFT
+    val bostatuskode = BostatusKode.MED_FORELDRE
+    val fodselsdato = "2006-02-01"
   }
 
   object MockitoHelper {

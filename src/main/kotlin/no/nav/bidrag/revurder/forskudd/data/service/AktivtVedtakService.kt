@@ -3,7 +3,6 @@ package no.nav.bidrag.revurder.forskudd.data.service
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import no.nav.bidrag.revurder.forskudd.data.bo.toFinnAktivtVedtakDto
 import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
-import no.nav.bidrag.revurder.forskudd.data.dto.NyttAktivtVedtakRequestDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +15,15 @@ class AktivtVedtakService(val persistenceService: PersistenceService) {
     return opprettetAktivtVedtak.aktivtVedtakId
   }
 
+  fun oppdaterAktivtVedtak(aktivtVedtakBo: AktivtVedtakBo): Int {
+    val oppdatertAktivtVedtak = persistenceService.oppdaterAktivtVedtak(aktivtVedtakBo)
+    return oppdatertAktivtVedtak.aktivtVedtakId
+  }
+
+  fun slettAktivtVedtak(eksisterendeAktivtVedtakId: Int) {
+    persistenceService.slettAktivtVedtak(eksisterendeAktivtVedtakId)
+  }
+
   fun finnAktivtVedtakFraId(aktivtVedtakId: Int): FinnAktivtVedtakDto? {
     val aktivtVedtakDto = persistenceService.finnAktivtVedtakFraId(aktivtVedtakId)
     return aktivtVedtakDto?.toFinnAktivtVedtakDto()
@@ -26,14 +34,5 @@ class AktivtVedtakService(val persistenceService: PersistenceService) {
   fun finnAktivtVedtak(soknadsbarnId: String): FinnAktivtVedtakDto? {
     val aktivtVedtakDto = persistenceService.finnAktivtVedtak(soknadsbarnId)
     return aktivtVedtakDto?.toFinnAktivtVedtakDto()
-  }
-
-  fun oppdaterAktivtVedtak(eksisterendeAktivtVedtak: FinnAktivtVedtakDto, oppdatertAktivtVedtak: NyttAktivtVedtakRequestDto) {
-
-    //TODO
-  }
-
-  fun slettAktivtVedtak(eksisterendeAktivtVedtak: FinnAktivtVedtakDto) {
-    persistenceService.slettAktivtVedtak(eksisterendeAktivtVedtak.aktivtVedtakId)
   }
 }

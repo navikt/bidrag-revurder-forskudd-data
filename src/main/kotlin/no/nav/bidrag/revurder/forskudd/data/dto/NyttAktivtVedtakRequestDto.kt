@@ -1,6 +1,9 @@
 package no.nav.bidrag.revurder.forskudd.data.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -28,7 +31,7 @@ data class NyttAktivtVedtakRequestDto(
   val vedtakDatoSisteManuelleVedtak: LocalDate = LocalDate.now(),
 
   @Schema(description = "Vedtaktype")
-  val vedtakType: String = "",
+  val vedtakType: VedtakType = VedtakType.MANUELT,
 
   @Schema(description = "Beløp")
   val belop: BigDecimal = BigDecimal.ZERO,
@@ -40,13 +43,13 @@ data class NyttAktivtVedtakRequestDto(
   val resultatkode: String = "",
 
   @Schema(description = "Mottakers sivilstand siste manuelle vedtak")
-  val mottakerSivilstandSisteManuelleVedtak: String = "",
+  val mottakerSivilstandSisteManuelleVedtak: SivilstandKode = SivilstandKode.GIFT,
 
   @Schema(description = "Mottakers antall barn siste manuelle vedtak")
   val mottakerAntallBarnSisteManuelleVedtak: Int = 0,
 
   @Schema(description = "Søknadsbarnets bostedsstatus")
-  val soknadsbarnBostedsstatus: String = "",
+  val soknadsbarnBostedsstatus: BostatusKode = BostatusKode.MED_FORELDRE,
 
   @Schema(description = "Søknadsbarnets fødselsdato")
   val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),

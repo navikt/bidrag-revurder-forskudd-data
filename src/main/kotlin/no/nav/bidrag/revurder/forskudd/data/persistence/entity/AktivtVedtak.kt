@@ -1,5 +1,8 @@
 package no.nav.bidrag.revurder.forskudd.data.persistence.entity
 
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -74,6 +77,11 @@ data class AktivtVedtak(
 fun AktivtVedtak.toAktivtVedtakBo() = with(::AktivtVedtakBo) {
   val propertiesByName = AktivtVedtak::class.memberProperties.associateBy { it.name }
   callBy(parameters.associateWith { parameter ->
-    propertiesByName[parameter.name]?.get(this@toAktivtVedtakBo)
+    when (parameter.name) {
+      AktivtVedtakBo::vedtakType.name -> VedtakType.valueOf(vedtakType)
+      AktivtVedtakBo::mottakerSivilstandSisteManuelleVedtak.name -> SivilstandKode.valueOf(mottakerSivilstandSisteManuelleVedtak)
+      AktivtVedtakBo::soknadsbarnBostedsstatus.name -> BostatusKode.valueOf(soknadsbarnBostedsstatus)
+      else -> propertiesByName[parameter.name]?.get(this@toAktivtVedtakBo)
+    }
   })
 }

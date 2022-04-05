@@ -3,11 +3,13 @@ package no.nav.bidrag.revurder.forskudd.data.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
 import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakDto
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
 import no.nav.bidrag.behandling.felles.enums.GrunnlagType
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
 import no.nav.bidrag.behandling.felles.enums.StonadType
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
-import no.nav.bidrag.revurder.forskudd.data.dto.NyttAktivtVedtakRequestDto
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import org.slf4j.LoggerFactory
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
 
-private val LOGGER = LoggerFactory.getLogger(DefaultBehandleHendelseService::class.java)
+private val LOGGER = LoggerFactory.getLogger(BehandleHendelseService::class.java)
 
 interface BehandleHendelseService {
 
@@ -35,23 +37,34 @@ class DefaultBehandleHendelseService(
     }
   }
 
+  // Sjekker om det finnes et aktivt vedtak med samme soknadsbarnId (kravhaverId) som i den nye hendelsen. 4 mulige utfall:
+  // - vedtakHendelse har resultatkode 'AVSLAG' i den siste perioden og det finnes et aktivt vedtak: Slett det aktive vedtaket
+  // - vedtakHendelse har ikke resultatkode 'AVSLAG' i den siste perioden og det finnes et aktivt vedtak: Oppdater det aktive vedtaket
+  // - vedtakHendelse har resultatkode 'AVSLAG' i den siste perioden og det finnes ikke et aktivt vedtak: Ikke gjør noenting
+  // - vedtakHendelse har ikke resultatkode 'AVSLAG' i den siste perioden og det finnes ikke et aktivt vedtak: Opprett et nytt aktivt vedtak (men kun
+  //   hvis vedtakType = 'MANUELT'
   private fun behandleAktivtVedtakHendelse(vedtakHendelse: VedtakHendelse) {
+
+    LOGGER.info("Behandler ny hendelse med vedtakId: ${vedtakHendelse.vedtakId}")
     val vedtakHendelseSistePeriode = hentVedtakHendelseSistePeriode(vedtakHendelse)
     val eksisterendeAktivtVedtak = aktivtVedtakService.finnAktivtVedtak(vedtakHendelse.kravhaverId)
     if (eksisterendeAktivtVedtak != null) {
       if (vedtakHendelseSistePeriode.resultatkode == "AVSLAG") {
         LOGGER.info("Aktivt vedtak funnet (vil bli slettet fordi resultatkode på vedtakHendelse er AVSLAG): $eksisterendeAktivtVedtak")
-        slettEksisterendeAktivtVedtak(eksisterendeAktivtVedtak)
+        slettEksisterendeAktivtVedtak(eksisterendeAktivtVedtak.aktivtVedtakId)
       } else {
         LOGGER.info("Aktivt vedtak funnet (vil bli oppdatert): $eksisterendeAktivtVedtak")
         val bidragVedtakData = hentBidragVedtakData(vedtakHendelse.vedtakId)
         oppdaterEksisterendeAktivtVedtak(eksisterendeAktivtVedtak, vedtakHendelse, vedtakHendelseSistePeriode, bidragVedtakData)
       }
     } else {
-      LOGGER.info("Aktivt vedtak ikke funnet. Nytt aktivt vedtak vil bli opprettet.")
-      val bidragVedtakData = hentBidragVedtakData(vedtakHendelse.vedtakId)
-      //TODO Skal bare gjøres hvis vedtakType er MANUELL
-      opprettNyttAktivtVedtak(vedtakHendelse, vedtakHendelseSistePeriode, bidragVedtakData)
+      if ((vedtakHendelseSistePeriode.resultatkode != "AVSLAG") && (vedtakHendelse.vedtakType == VedtakType.MANUELT)) {
+        LOGGER.info("Aktivt vedtak ikke funnet. Nytt aktivt vedtak vil bli opprettet.")
+        val bidragVedtakData = hentBidragVedtakData(vedtakHendelse.vedtakId)
+        opprettNyttAktivtVedtak(vedtakHendelse, vedtakHendelseSistePeriode, bidragVedtakData)
+      } else {
+        LOGGER.info("Aktivt vedtak ikke funnet, men resultatkode til hendelse er 'AVSLAG' eller vedtakType er 'MANUELT'. Nytt aktivt vedtak vil ikke bli opprettet.")
+      }
     }
   }
 
@@ -109,14 +122,14 @@ class DefaultBehandleHendelseService(
     //val soknadsbarnHarUnntakskode = false
 
     return BidragVedtakData(
-      mottakerSivilstandSisteManuelleVedtak = mottakerSivilstandSisteManuelleVedtak,
-      soknadsbarnBostedsstatus = soknadsbarnBostedsstatus,
+      mottakerSivilstandSisteManuelleVedtak = SivilstandKode.valueOf(mottakerSivilstandSisteManuelleVedtak),
+      soknadsbarnBostedsstatus = BostatusKode.valueOf(soknadsbarnBostedsstatus),
       soknadsbarnFodselsdato = LocalDate.parse(soknadsbarnFodselsdato)
     )
   }
 
-  private fun slettEksisterendeAktivtVedtak(eksisterendeAktivtVedtak: FinnAktivtVedtakDto) {
-    aktivtVedtakService.slettAktivtVedtak(eksisterendeAktivtVedtak)
+  private fun slettEksisterendeAktivtVedtak(eksisterendeAktivtVedtakId: Int) {
+    aktivtVedtakService.slettAktivtVedtak(eksisterendeAktivtVedtakId)
   }
 
   private fun oppdaterEksisterendeAktivtVedtak(
@@ -126,34 +139,25 @@ class DefaultBehandleHendelseService(
     bidragVedtakData: BidragVedtakData
   ) {
 
-    // Verifiser at følgende felter er like i eksisterende og nytt vedtak:
-    if (eksisterendeAktivtVedtak.sakId.equals(vedtakHendelse.sakId) &&
-      eksisterendeAktivtVedtak.mottakerId == vedtakHendelse.mottakerId
-    ) {
-      // Gjør ingenting
-    } else {
-      //TODO Feilhåndtering
-    }
-
-    val oppdatertAktivtVedtak = NyttAktivtVedtakRequestDto(
+    val oppdatertAktivtVedtak = AktivtVedtakBo(
       vedtakId = vedtakHendelse.vedtakId,
-      sakId = eksisterendeAktivtVedtak.sakId,
+      sakId = vedtakHendelse.sakId,
       soknadsbarnId = eksisterendeAktivtVedtak.soknadsbarnId,
-      mottakerId = eksisterendeAktivtVedtak.mottakerId,
+      mottakerId = vedtakHendelse.mottakerId,
       vedtakDatoSisteVedtak = vedtakHendelse.opprettetTimestamp.toLocalDate(),
-      vedtakDatoSisteManuelleVedtak = vedtakHendelse.opprettetTimestamp.toLocalDate(), //TODO Skal erstattes kun hvis vedtakHendelse.vedtakType = MANUELL
-      vedtakType = vedtakHendelse.vedtakType.toString(),
+      vedtakDatoSisteManuelleVedtak = if (vedtakHendelse.vedtakType == VedtakType.MANUELT) vedtakHendelse.opprettetTimestamp.toLocalDate() else eksisterendeAktivtVedtak.vedtakDatoSisteManuelleVedtak,
+      vedtakType = vedtakHendelse.vedtakType,
       belop = vedtakHendelsePeriode.belop,
       valutakode = vedtakHendelsePeriode.valutakode,
       resultatkode = vedtakHendelsePeriode.resultatkode,
-      mottakerSivilstandSisteManuelleVedtak = bidragVedtakData.mottakerSivilstandSisteManuelleVedtak, //TODO Skal erstattes kun hvis vedtakHendelse.vedtakType = MANUELL
-      mottakerAntallBarnSisteManuelleVedtak = bidragVedtakData.mottakerAntallBarnSisteManuelleVedtak, //TODO Skal erstattes kun hvis vedtakHendelse.vedtakType = MANUELL
+      mottakerSivilstandSisteManuelleVedtak = if (vedtakHendelse.vedtakType == VedtakType.MANUELT) bidragVedtakData.mottakerSivilstandSisteManuelleVedtak else eksisterendeAktivtVedtak.mottakerSivilstandSisteManuelleVedtak,
+      mottakerAntallBarnSisteManuelleVedtak = if (vedtakHendelse.vedtakType == VedtakType.MANUELT) bidragVedtakData.mottakerAntallBarnSisteManuelleVedtak else eksisterendeAktivtVedtak.mottakerAntallBarnSisteManuelleVedtak,
       soknadsbarnBostedsstatus = bidragVedtakData.soknadsbarnBostedsstatus,
       soknadsbarnFodselsdato = eksisterendeAktivtVedtak.soknadsbarnFodselsdato,
       soknadsbarnHarUnntakskode = bidragVedtakData.soknadsbarnHarUnntakskode
     )
 
-    aktivtVedtakService.oppdaterAktivtVedtak(eksisterendeAktivtVedtak, oppdatertAktivtVedtak)
+    aktivtVedtakService.oppdaterAktivtVedtak(oppdatertAktivtVedtak)
   }
 
   private fun opprettNyttAktivtVedtak(
@@ -169,7 +173,7 @@ class DefaultBehandleHendelseService(
       mottakerId = vedtakHendelse.mottakerId,
       vedtakDatoSisteVedtak = vedtakHendelse.opprettetTimestamp.toLocalDate(),
       vedtakDatoSisteManuelleVedtak = vedtakHendelse.opprettetTimestamp.toLocalDate(),
-      vedtakType = vedtakHendelse.vedtakType.toString(),
+      vedtakType = vedtakHendelse.vedtakType,
       belop = vedtakHendelsePeriode.belop,
       valutakode = vedtakHendelsePeriode.valutakode,
       resultatkode = vedtakHendelsePeriode.resultatkode,
@@ -185,9 +189,9 @@ class DefaultBehandleHendelseService(
 }
 
 data class BidragVedtakData(
-  val mottakerSivilstandSisteManuelleVedtak: String = "",
+  val mottakerSivilstandSisteManuelleVedtak: SivilstandKode = SivilstandKode.GIFT,
   val mottakerAntallBarnSisteManuelleVedtak: Int = 0,
-  val soknadsbarnBostedsstatus: String = "",
+  val soknadsbarnBostedsstatus: BostatusKode = BostatusKode.MED_FORELDRE,
   val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),
   val soknadsbarnHarUnntakskode: Boolean = false
 )

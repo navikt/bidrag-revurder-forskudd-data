@@ -1,5 +1,8 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.BidragRevurderForskuddDataTest
 import no.nav.bidrag.revurder.forskudd.data.PROFILE_TEST
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
@@ -32,25 +35,6 @@ class AktivtVedtakServiceTest {
 
   @Autowired
   private lateinit var persistenceService: PersistenceService
-
-  val vedtakId = 1
-  val sakId = "SAK-001"
-  val soknadsbarnId = "01010511111"
-  val mottakerId = "01018211111"
-  val vedtakDatoSisteVedtak = LocalDate.parse("2020-01-01")
-  val vedtakDatoSisteManuelleVedtak = LocalDate.parse("2020-01-01")
-  val vedtakType = "MANUELL"
-  val belop = BigDecimal.valueOf(3490.00)
-  val valutakode = "NOK"
-  val resultatkode = "FORHOYET_FORSKUDD_100_PROSENT"
-  val mottakerSivilstandSisteManuelleVedtak = "GIFT"
-  val mottakerAntallBarnSisteManuelleVedtak = 2
-  val soknadsbarnBostedsstatus = "MED_FORELDRE"
-  val soknadsbarnFodselsdato = LocalDate.parse("2015-01-01")
-  val soknadsbarnHarUnntakskode = false
-  val opprettetTimestamp = LocalDateTime.now()
-
-  val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
 
   @BeforeEach
   fun `init`() {
@@ -146,4 +130,25 @@ class AktivtVedtakServiceTest {
     soknadsbarnHarUnntakskode = soknadsbarnHarUnntakskode,
     opprettetTimestamp = opprettetTimestamp
   )
+
+  companion object {
+    val vedtakId = 1
+    val sakId = "SAK-001"
+    val soknadsbarnId = "01010511111"
+    val mottakerId = "01018211111"
+    val vedtakDatoSisteVedtak = LocalDate.parse("2020-01-01")
+    val vedtakDatoSisteManuelleVedtak = LocalDate.parse("2020-01-01")
+    val vedtakType = VedtakType.MANUELT
+    val belop = BigDecimal.valueOf(3490.00)
+    val valutakode = "NOK"
+    val resultatkode = "FORHOYET_FORSKUDD_100_PROSENT"
+    val mottakerSivilstandSisteManuelleVedtak = SivilstandKode.GIFT
+    val mottakerAntallBarnSisteManuelleVedtak = 2
+    val soknadsbarnBostedsstatus = BostatusKode.MED_FORELDRE
+    val soknadsbarnFodselsdato = LocalDate.parse("2015-01-01")
+    val soknadsbarnHarUnntakskode = false
+    val opprettetTimestamp = LocalDateTime.now()
+
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+  }
 }

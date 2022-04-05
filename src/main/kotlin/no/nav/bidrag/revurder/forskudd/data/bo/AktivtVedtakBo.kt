@@ -1,6 +1,9 @@
 package no.nav.bidrag.revurder.forskudd.data.bo
 
 import io.swagger.v3.oas.annotations.media.Schema
+import no.nav.bidrag.behandling.felles.enums.BostatusKode
+import no.nav.bidrag.behandling.felles.enums.SivilstandKode
+import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
 import no.nav.bidrag.revurder.forskudd.data.persistence.entity.AktivtVedtak
 import java.math.BigDecimal
@@ -32,7 +35,7 @@ data class AktivtVedtakBo(
   val vedtakDatoSisteManuelleVedtak: LocalDate = LocalDate.now(),
 
   @Schema(description = "Vedtaktype")
-  val vedtakType: String = "",
+  val vedtakType: VedtakType = VedtakType.MANUELT,
 
   @Schema(description = "Beløp")
   val belop: BigDecimal = BigDecimal.ZERO,
@@ -44,13 +47,13 @@ data class AktivtVedtakBo(
   val resultatkode: String = "",
 
   @Schema(description = "Mottakers sivilstand siste manuelle vedtak")
-  val mottakerSivilstandSisteManuelleVedtak: String = "",
+  val mottakerSivilstandSisteManuelleVedtak: SivilstandKode = SivilstandKode.GIFT,
 
   @Schema(description = "Mottakers antall barn siste manuelle vedtak")
   val mottakerAntallBarnSisteManuelleVedtak: Int = 0,
 
   @Schema(description = "Søknadsbarnets bostedsstatus")
-  val soknadsbarnBostedsstatus: String = "",
+  val soknadsbarnBostedsstatus: BostatusKode = BostatusKode.MED_FORELDRE,
 
   @Schema(description = "Søknadsbarnets fødselsdato")
   val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),
@@ -68,7 +71,12 @@ data class AktivtVedtakBo(
 fun AktivtVedtakBo.toAktivtVedtakEntity() = with(::AktivtVedtak) {
   val propertiesByName = AktivtVedtakBo::class.memberProperties.associateBy { it.name }
   callBy(parameters.associateWith { parameter ->
-    propertiesByName[parameter.name]?.get(this@toAktivtVedtakEntity)
+    when (parameter.name) {
+      AktivtVedtak::vedtakType.name -> vedtakType.toString()
+      AktivtVedtak::mottakerSivilstandSisteManuelleVedtak.name -> mottakerSivilstandSisteManuelleVedtak.toString()
+      AktivtVedtak::soknadsbarnBostedsstatus.name -> soknadsbarnBostedsstatus.toString()
+      else -> propertiesByName[parameter.name]?.get(this@toAktivtVedtakEntity)
+    }
   })
 }
 
