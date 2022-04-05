@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 private val LOGGER = LoggerFactory.getLogger(BehandleHendelseService::class.java)
 
@@ -154,7 +155,9 @@ class DefaultBehandleHendelseService(
       mottakerAntallBarnSisteManuelleVedtak = if (vedtakHendelse.vedtakType == VedtakType.MANUELT) bidragVedtakData.mottakerAntallBarnSisteManuelleVedtak else eksisterendeAktivtVedtak.mottakerAntallBarnSisteManuelleVedtak,
       soknadsbarnBostedsstatus = bidragVedtakData.soknadsbarnBostedsstatus,
       soknadsbarnFodselsdato = eksisterendeAktivtVedtak.soknadsbarnFodselsdato,
-      soknadsbarnHarUnntakskode = bidragVedtakData.soknadsbarnHarUnntakskode
+      soknadsbarnHarUnntakskode = bidragVedtakData.soknadsbarnHarUnntakskode,
+      opprettetTimestamp = eksisterendeAktivtVedtak.opprettetTimestamp,
+      sistEndretTimestamp = LocalDateTime.now()
     )
 
     aktivtVedtakService.oppdaterAktivtVedtak(oppdatertAktivtVedtak)
@@ -181,7 +184,9 @@ class DefaultBehandleHendelseService(
       mottakerAntallBarnSisteManuelleVedtak = bidragVedtakData.mottakerAntallBarnSisteManuelleVedtak,
       soknadsbarnBostedsstatus = bidragVedtakData.soknadsbarnBostedsstatus,
       soknadsbarnFodselsdato = bidragVedtakData.soknadsbarnFodselsdato,
-      soknadsbarnHarUnntakskode = bidragVedtakData.soknadsbarnHarUnntakskode
+      soknadsbarnHarUnntakskode = bidragVedtakData.soknadsbarnHarUnntakskode,
+      opprettetTimestamp = LocalDateTime.now(),
+      sistEndretTimestamp = null
     )
 
     aktivtVedtakService.opprettNyttAktivtVedtak(nyttAktivtVedtak)
