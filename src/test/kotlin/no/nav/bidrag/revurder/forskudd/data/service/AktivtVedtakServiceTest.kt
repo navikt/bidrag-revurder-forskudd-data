@@ -131,7 +131,7 @@ class AktivtVedtakServiceTest {
     opprettetTimestamp = opprettetTimestamp
   )
 
-  companion object {
+  private companion object {
     val vedtakId = 1
     val sakId = "SAK-001"
     val soknadsbarnId = "01010511111"
