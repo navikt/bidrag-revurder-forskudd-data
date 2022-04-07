@@ -1,5 +1,6 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.bidrag.behandling.felles.dto.vedtak.GrunnlagDto
 import no.nav.bidrag.behandling.felles.dto.vedtak.StonadsendringDto
 import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
@@ -53,6 +54,8 @@ internal class BehandleHendelseServiceMockTest {
 
   @Captor
   private lateinit var slettAktivtVedtakCaptor: ArgumentCaptor<Int>
+
+  val mapper = ObjectMapper()
 
   @Test
   @Suppress("NonAsciiCharacters")
@@ -216,7 +219,9 @@ internal class BehandleHendelseServiceMockTest {
       Executable {
         assertThat(aktivtVedtakSomSkalOppdateres.opprettetTimestamp).`as`("opprettetTimestamp").isEqualTo(dateTimeNow.minusYears(1))
       },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.sistEndretTimestamp!!.toLocalDate()).`as`("soknadsbarnFodselsdato").isEqualTo(LocalDate.now()) }
+      Executable {
+        assertThat(aktivtVedtakSomSkalOppdateres.sistEndretTimestamp!!.toLocalDate()).`as`("soknadsbarnFodselsdato").isEqualTo(LocalDate.now())
+      }
     )
   }
 
@@ -412,32 +417,38 @@ internal class BehandleHendelseServiceMockTest {
           grunnlagId = 1,
           referanse = "Mottatt_Sivilstand",
           type = GrunnlagType.SIVILSTAND,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.BIDRAGSMOTTAKER}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "sivilstandKode": "$sivilstandkode1"
       }"""
+          )
         ),
         GrunnlagDto(
           grunnlagId = 2,
           referanse = "Mottatt_Bostatus",
           type = GrunnlagType.BOSTATUS,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "bostatusKode": "$bostatuskode1"
       }"""
+          )
         ),
         GrunnlagDto(
           grunnlagId = 3,
           referanse = "Mottatt_Barn",
           type = GrunnlagType.BARN,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "fodselsdato": "$fodselsdato"
       }"""
+          )
         ),
       ),
       listOf(
@@ -477,32 +488,38 @@ internal class BehandleHendelseServiceMockTest {
           grunnlagId = 1,
           referanse = "Mottatt_Sivilstand",
           type = GrunnlagType.SIVILSTAND,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.BIDRAGSMOTTAKER}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "sivilstandKode": "$sivilstandkode2"
       }"""
+          )
         ),
         GrunnlagDto(
           grunnlagId = 2,
           referanse = "Mottatt_Bostatus",
           type = GrunnlagType.BOSTATUS,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "bostatusKode": "$bostatuskode2"
       }"""
+          )
         ),
         GrunnlagDto(
           grunnlagId = 3,
           referanse = "Mottatt_Barn",
           type = GrunnlagType.BARN,
-          innhold = """{
+          innhold = mapper.readTree(
+            """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "fodselsdato": "$fodselsdato"
       }"""
+          )
         ),
       ),
       listOf(

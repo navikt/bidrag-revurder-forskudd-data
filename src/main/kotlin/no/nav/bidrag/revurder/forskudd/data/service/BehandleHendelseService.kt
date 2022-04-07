@@ -1,6 +1,5 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
 import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakDto
 import no.nav.bidrag.behandling.felles.enums.BostatusKode
@@ -101,24 +100,21 @@ class DefaultBehandleHendelseService(
       it.type == GrunnlagType.SIVILSTAND &&
           grunnlagReferanseListe.contains(it.referanse)
     }
-    val grunnlagSivilstandInnholdJson = ObjectMapper().readTree(grunnlagSivilstand.innhold)
     val grunnlagBostatus = hentVedtakResponse.grunnlagListe.first {
       it.type == GrunnlagType.BOSTATUS &&
           grunnlagReferanseListe.contains(it.referanse)
     }
-    val grunnlagBostatusInnholdJson = ObjectMapper().readTree(grunnlagBostatus.innhold)
     val grunnlagBarn = hentVedtakResponse.grunnlagListe.first {
       it.type == GrunnlagType.BARN &&
           grunnlagReferanseListe.contains(it.referanse)
     }
-    val grunnlagBarnInnholdJson = ObjectMapper().readTree(grunnlagBarn.innhold)
     //TODO Feilhåndtering av Json-mappinger
     //TODO Sjekke at det er et manuelt vedtak
-    val mottakerSivilstandSisteManuelleVedtak = grunnlagSivilstandInnholdJson.get("sivilstandKode")!!.asText()
+    val mottakerSivilstandSisteManuelleVedtak = grunnlagSivilstand.innhold.get("sivilstandKode")!!.asText()
     //TODO Sjekke at det er et manuelt vedtak + skrive om antall barn - logikken i bidrag-beregn-forskudd-rest
     //val mottakerAntallBarnSisteManuelleVedtak = 0
-    val soknadsbarnBostedsstatus = grunnlagBostatusInnholdJson.get("bostatusKode")!!.asText()
-    val soknadsbarnFodselsdato = grunnlagBarnInnholdJson.get("fodselsdato")!!.asText()
+    val soknadsbarnBostedsstatus = grunnlagBostatus.innhold.get("bostatusKode")!!.asText()
+    val soknadsbarnFodselsdato = grunnlagBarn.innhold.get("fodselsdato")!!.asText()
     //TODO Må implementeres i bidrag-vedtak
     //val soknadsbarnHarUnntakskode = false
 

@@ -24,7 +24,7 @@
     <bidrag-commons.version>0.6.7</bidrag-commons.version>
     <bidrag-commons-test.version>0.2.2</bidrag-commons-test.version>
     <bidrag-behandling-felles.version>0.0.9</bidrag-behandling-felles.version>
-    <bidrag-behandling-felles-dto.version>0.0.8</bidrag-behandling-felles-dto.version>
+    <bidrag-behandling-felles-dto.version>0.0.9</bidrag-behandling-felles-dto.version>
     <token-support.version>2.0.14</token-support.version>
     <build-helper-maven.version>3.2.0</build-helper-maven.version>
     <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
@@ -32,6 +32,7 @@
     <nimbus-jose-jwt.version>9.21</nimbus-jose-jwt.version>
     <springframework-cloud.version>3.1.1</springframework-cloud.version>
     <com.squareup.okhttp3.version>4.9.2</com.squareup.okhttp3.version>
+    <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
   </properties>
 
   <dependencyManagement>
@@ -214,6 +215,14 @@
           <artifactId>guava</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <!-- Wiremock -->
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock-standalone.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
