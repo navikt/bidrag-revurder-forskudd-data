@@ -1,0 +1,67 @@
+{
+  "vedtakId": 1,
+  "vedtakType": "MANUELT",
+  "opprettetAv": "",
+  "vedtakDato": "2022-04-01",
+  "enhetId": "",
+  "opprettetTimestamp": "2022-04-10T10:19:31.289Z",
+  "grunnlagListe": [
+    {
+      "grunnlagId": 1,
+      "referanse": "Mottatt_Sivilstand",
+      "type": "SIVILSTAND",
+      "innhold": {
+        "rolle": "BIDRAGSMOTTAKER",
+        "datoFom": "2022-04-01",
+        "datoTil": null,
+        "sivilstandKode": "GIFT"
+      }
+    },
+    {
+      "grunnlagId": 2,
+      "referanse": "Mottatt_Bostatus",
+      "type": "BOSTATUS",
+      "innhold": {
+        "rolle": "SOKNADSBARN",
+        "datoFom": "2022-04-01",
+        "datoTil": null,
+        "bostatusKode": "MED_FORELDRE"
+      }
+    },
+    {
+      "grunnlagId": 3,
+      "referanse": "Mottatt_Barn",
+      "type": "BARN",
+      "innhold": {
+        "rolle": "SOKNADSBARN",
+        "fodselsdato": "2006-02-01"
+      }
+    }
+  ],
+  "stonadsendringListe": [
+    {
+      "stonadType": "FORSKUDD",
+      "sakId": "SAK-001",
+      "behandlingId": "",
+      "skyldnerId": "12345",
+      "kravhaverId": "54321",
+      "mottakerId": "24680",
+      "periodeListe": [
+        {
+          "periodeFomDato": "2022-04-01",
+          "periodeTilDato": null,
+          "belop": 0,
+          "valutakode": "NOK",
+          "resultatkode": "RESULTAT",
+          "grunnlagReferanseListe": [
+            "Mottatt_Sivilstand",
+            "Mottatt_Bostatus",
+            "Mottatt_Barn"
+          ]
+        }
+      ]
+    }
+  ],
+  "engangsbelopListe": [],
+  "behandlingsreferanseListe": []
+}

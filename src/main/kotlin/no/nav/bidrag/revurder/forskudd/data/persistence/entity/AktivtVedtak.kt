@@ -25,7 +25,7 @@ data class AktivtVedtak(
   @Column(nullable = false, name = "vedtak_id")
   val vedtakId: Int = 0,
 
-  @Column(name = "sak_id")
+  @Column(nullable = true, name = "sak_id")
   val sakId: String? = "",
 
   @Column(nullable = false, name = "soknadsbarn_id")
@@ -70,7 +70,7 @@ data class AktivtVedtak(
   @Column(nullable = false, name = "opprettet_timestamp")
   val opprettetTimestamp: LocalDateTime = LocalDateTime.now(),
 
-  @Column(nullable = false, name = "sist_endret_timestamp")
+  @Column(nullable = true, name = "sist_endret_timestamp")
   val sistEndretTimestamp: LocalDateTime? = LocalDateTime.now()
 )
 

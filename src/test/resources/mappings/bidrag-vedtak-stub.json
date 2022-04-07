@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/vedtak/.*"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "bidrag-vedtak-respons-data.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

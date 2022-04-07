@@ -1,4 +1,4 @@
-VEDTAK_URL: http://localhost:${wiremock.server.port:0}/vedtak
+VEDTAK_URL: http://localhost:8096/vedtak
 TOPIC_VEDTAK: topic_vedtak
 KAFKA_BROKERS: localhost:9092
 
@@ -41,3 +41,9 @@ no.nav.security.jwt:
           client-id: 123
           client-secret: 123
           client-auth-method: client_secret_basic
+
+---
+
+wiremock:
+  server.files: classpath:/__files
+  server.stubs: classpath:/mappings
