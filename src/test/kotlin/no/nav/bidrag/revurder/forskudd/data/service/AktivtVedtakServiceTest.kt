@@ -46,16 +46,16 @@ class AktivtVedtakServiceTest {
   @Suppress("NonAsciiCharacters")
   fun `skal opprette nytt aktivt vedtak`() {
     // Oppretter nytt aktivt vedtak
-    val nyttAktivtVedtakOpprettet = aktivtVedtakService.opprettNyttAktivtVedtak(byggAktivtVedtakDto())
+    val nyttAktivtVedtakOpprettet = aktivtVedtakService.opprettNyttAktivtVedtak(byggAktivtVedtakBo())
 
-    assertThat(nyttAktivtVedtakOpprettet).isNotNull()
+    assertThat(nyttAktivtVedtakOpprettet).isNotNull
   }
 
   @Test
   @Suppress("NonAsciiCharacters")
   fun `skal finne aktivt vedtak fra søknadsbarn id`() {
     // Oppretter nytt aktivt vedtak
-    val nyttAktivtVedtakOpprettet = persistenceService.opprettNyttAktivtVedtak(byggAktivtVedtakDto())
+    val nyttAktivtVedtakOpprettet = persistenceService.opprettNyttAktivtVedtak(byggAktivtVedtakBo())
 
     // Finner det aktive vedtaket som akkurat ble opprettet
     val aktivtVedtakFunnet = aktivtVedtakService.finnAktivtVedtak(nyttAktivtVedtakOpprettet.soknadsbarnId)
@@ -85,7 +85,7 @@ class AktivtVedtakServiceTest {
   @Suppress("NonAsciiCharacters")
   fun `skal finne aktivt vedtak fra generert id`() {
     // Oppretter nytt aktivt vedtak
-    val nyttAktivtVedtakOpprettet = persistenceService.opprettNyttAktivtVedtak(byggAktivtVedtakDto())
+    val nyttAktivtVedtakOpprettet = persistenceService.opprettNyttAktivtVedtak(byggAktivtVedtakBo())
 
     // Finner det aktive vedtaket som akkurat ble opprettet
     val aktivtVedtakFunnet = aktivtVedtakService.finnAktivtVedtakFraId(nyttAktivtVedtakOpprettet.aktivtVedtakId)
@@ -111,7 +111,7 @@ class AktivtVedtakServiceTest {
     )
   }
 
-  fun byggAktivtVedtakDto() = AktivtVedtakBo(
+  fun byggAktivtVedtakBo() = AktivtVedtakBo(
     aktivtVedtakId = (1..100).random(),
     vedtakId = vedtakId,
     sakId = sakId,
@@ -128,27 +128,28 @@ class AktivtVedtakServiceTest {
     soknadsbarnBostedsstatus = soknadsbarnBostedsstatus,
     soknadsbarnFodselsdato = soknadsbarnFodselsdato,
     soknadsbarnHarUnntakskode = soknadsbarnHarUnntakskode,
-    opprettetTimestamp = opprettetTimestamp
+    opprettetTimestamp = opprettetTimestamp,
+    sistEndretTimestamp = null
   )
 
   private companion object {
-    val vedtakId = 1
-    val sakId = "SAK-001"
-    val soknadsbarnId = "01010511111"
-    val mottakerId = "01018211111"
-    val vedtakDatoSisteVedtak = LocalDate.parse("2020-01-01")
-    val vedtakDatoSisteManuelleVedtak = LocalDate.parse("2020-01-01")
+    const val vedtakId = 1
+    const val sakId = "SAK-001"
+    const val soknadsbarnId = "01010511111"
+    const val mottakerId = "01018211111"
+    val vedtakDatoSisteVedtak: LocalDate = LocalDate.parse("2020-01-01")
+    val vedtakDatoSisteManuelleVedtak: LocalDate = LocalDate.parse("2020-01-01")
     val vedtakType = VedtakType.MANUELT
-    val belop = BigDecimal.valueOf(3490.00)
-    val valutakode = "NOK"
-    val resultatkode = "FORHOYET_FORSKUDD_100_PROSENT"
+    val belop: BigDecimal = BigDecimal.valueOf(3490.00)
+    const val valutakode = "NOK"
+    const val resultatkode = "FORHOYET_FORSKUDD_100_PROSENT"
     val mottakerSivilstandSisteManuelleVedtak = SivilstandKode.GIFT
-    val mottakerAntallBarnSisteManuelleVedtak = 2
+    const val mottakerAntallBarnSisteManuelleVedtak = 2
     val soknadsbarnBostedsstatus = BostatusKode.MED_FORELDRE
-    val soknadsbarnFodselsdato = LocalDate.parse("2015-01-01")
-    val soknadsbarnHarUnntakskode = false
-    val opprettetTimestamp = LocalDateTime.now()
+    val soknadsbarnFodselsdato: LocalDate = LocalDate.parse("2015-01-01")
+    const val soknadsbarnHarUnntakskode = false
+    val opprettetTimestamp: LocalDateTime = LocalDateTime.now()
 
-    val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
   }
 }

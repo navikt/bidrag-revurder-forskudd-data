@@ -106,13 +106,13 @@ internal class BehandleHendelseServiceTest {
       },
       Executable {
         assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isEqualTo(BidragVedtakData().mottakerAntallBarnSisteManuelleVedtak)
+          .isZero()
       },
       Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
       Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
       Executable {
         assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isEqualTo(BidragVedtakData().soknadsbarnHarUnntakskode)
+          .isFalse()
       },
       Executable {
         assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
@@ -123,22 +123,22 @@ internal class BehandleHendelseServiceTest {
 
   private companion object {
 
-    val vedtakId = 1
+    const val vedtakId = 1
     val vedtakType = VedtakType.MANUELT
-    val sakId = "SAK-001"
-    val kravhaverId = "54321"
-    val mottakerId = "24680"
-    val belop1 = BigDecimal.valueOf(100)
-    val valutakode1 = "NOK"
-    val resultatkode1 = "RESULTATKODE1"
-    val dateNow = LocalDate.now()
-    val dateTimeNow = LocalDateTime.now()
+    const val sakId = "SAK-001"
+    const val kravhaverId = "54321"
+    const val mottakerId = "24680"
+    val belop1: BigDecimal = BigDecimal.valueOf(100)
+    const val valutakode1 = "NOK"
+    const val resultatkode1 = "RESULTATKODE1"
+    val dateNow: LocalDate = LocalDate.now()
+    val dateTimeNow: LocalDateTime = LocalDateTime.now()
     val sivilstandkode1 = SivilstandKode.GIFT
     val bostatuskode1 = BostatusKode.MED_FORELDRE
-    val fodselsdato = "2006-02-01"
+    const val fodselsdato = "2006-02-01"
 
-    val belop2 = BigDecimal.valueOf(200)
-    val valutakode2 = "EUR"
-    val resultatkode2 = "RESULTATKODE2"
+    val belop2: BigDecimal = BigDecimal.valueOf(200)
+    const val valutakode2 = "EUR"
+    const val resultatkode2 = "RESULTATKODE2"
   }
 }

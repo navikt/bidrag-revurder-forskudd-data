@@ -8,7 +8,6 @@ import no.nav.bidrag.behandling.felles.enums.SivilstandKode
 import no.nav.bidrag.behandling.felles.enums.StonadType
 import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
-import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import org.slf4j.LoggerFactory
@@ -130,13 +129,14 @@ class DefaultBehandleHendelseService(
   }
 
   private fun oppdaterEksisterendeAktivtVedtak(
-    eksisterendeAktivtVedtak: FinnAktivtVedtakDto,
+    eksisterendeAktivtVedtak: AktivtVedtakBo,
     vedtakHendelse: VedtakHendelse,
     vedtakHendelsePeriode: VedtakHendelsePeriode,
     bidragVedtakData: BidragVedtakData
   ) {
 
     val oppdatertAktivtVedtak = AktivtVedtakBo(
+      aktivtVedtakId = eksisterendeAktivtVedtak.aktivtVedtakId,
       vedtakId = vedtakHendelse.vedtakId,
       sakId = vedtakHendelse.sakId,
       soknadsbarnId = eksisterendeAktivtVedtak.soknadsbarnId,
@@ -166,6 +166,7 @@ class DefaultBehandleHendelseService(
   ) {
 
     val nyttAktivtVedtak = AktivtVedtakBo(
+      aktivtVedtakId = 0,
       vedtakId = vedtakHendelse.vedtakId,
       sakId = vedtakHendelse.sakId,
       soknadsbarnId = vedtakHendelse.kravhaverId,
@@ -190,9 +191,9 @@ class DefaultBehandleHendelseService(
 }
 
 data class BidragVedtakData(
-  val mottakerSivilstandSisteManuelleVedtak: SivilstandKode = SivilstandKode.GIFT,
+  val mottakerSivilstandSisteManuelleVedtak: SivilstandKode,
   val mottakerAntallBarnSisteManuelleVedtak: Int = 0,
-  val soknadsbarnBostedsstatus: BostatusKode = BostatusKode.MED_FORELDRE,
-  val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),
+  val soknadsbarnBostedsstatus: BostatusKode,
+  val soknadsbarnFodselsdato: LocalDate,
   val soknadsbarnHarUnntakskode: Boolean = false
 )
