@@ -1,8 +1,6 @@
 package no.nav.bidrag.revurder.forskudd.data.service
 
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
-import no.nav.bidrag.revurder.forskudd.data.bo.toFinnAktivtVedtakDto
-import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,15 +22,13 @@ class AktivtVedtakService(val persistenceService: PersistenceService) {
     persistenceService.slettAktivtVedtak(eksisterendeAktivtVedtakId)
   }
 
-  fun finnAktivtVedtakFraId(aktivtVedtakId: Int): FinnAktivtVedtakDto? {
-    val aktivtVedtakDto = persistenceService.finnAktivtVedtakFraId(aktivtVedtakId)
-    return aktivtVedtakDto?.toFinnAktivtVedtakDto()
+  fun finnAktivtVedtakFraId(aktivtVedtakId: Int): AktivtVedtakBo? {
+    return persistenceService.finnAktivtVedtakFraId(aktivtVedtakId)
   }
 
   // Sjekker om det allerede finnes et aktivt vedtak. soknadsbarnId (=kravhaverId fra vedtak-hendelse) vil være unikt, siden skyldnerId for
   // forskudd alltid vil være NAV
-  fun finnAktivtVedtak(soknadsbarnId: String): FinnAktivtVedtakDto? {
-    val aktivtVedtakDto = persistenceService.finnAktivtVedtak(soknadsbarnId)
-    return aktivtVedtakDto?.toFinnAktivtVedtakDto()
+  fun finnAktivtVedtak(soknadsbarnId: String): AktivtVedtakBo? {
+    return persistenceService.finnAktivtVedtak(soknadsbarnId)
   }
 }

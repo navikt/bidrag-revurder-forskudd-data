@@ -13,7 +13,6 @@ import no.nav.bidrag.behandling.felles.enums.SivilstandKode
 import no.nav.bidrag.behandling.felles.enums.StonadType
 import no.nav.bidrag.behandling.felles.enums.VedtakType
 import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
-import no.nav.bidrag.revurder.forskudd.data.dto.FinnAktivtVedtakDto
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import org.assertj.core.api.Assertions.assertThat
@@ -55,7 +54,7 @@ internal class BehandleHendelseServiceMockTest {
   @Captor
   private lateinit var slettAktivtVedtakCaptor: ArgumentCaptor<Int>
 
-  val mapper = ObjectMapper()
+  private val mapper = ObjectMapper()
 
   @Test
   @Suppress("NonAsciiCharacters")
@@ -125,13 +124,13 @@ internal class BehandleHendelseServiceMockTest {
       },
       Executable {
         assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isEqualTo(BidragVedtakData().mottakerAntallBarnSisteManuelleVedtak)
+          .isZero()
       },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
       Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
       Executable {
         assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isEqualTo(BidragVedtakData().soknadsbarnHarUnntakskode)
+          .isFalse()
       },
       Executable {
         assertThat(nyttAktivtVedtakSomSkalOpprettes.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
@@ -144,7 +143,7 @@ internal class BehandleHendelseServiceMockTest {
   @Suppress("NonAsciiCharacters")
   fun `skal oppdatere aktivt vedtak basert på data fra VedtakHendelse`() {
 
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagFinnAktivtVedtakDto())
+    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
     whenever(aktivtVedtakServiceMock.oppdaterAktivtVedtak(MockitoHelper.capture(aktivtVedtakCaptor))).thenReturn(1)
 
     // Simulerer vedtak returnert fra bidrag-vedtak
@@ -208,13 +207,13 @@ internal class BehandleHendelseServiceMockTest {
       },
       Executable {
         assertThat(aktivtVedtakSomSkalOppdateres.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isEqualTo(BidragVedtakData().mottakerAntallBarnSisteManuelleVedtak)
+          .isZero()
       },
       Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode2) },
       Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
       Executable {
         assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isEqualTo(BidragVedtakData().soknadsbarnHarUnntakskode)
+          .isFalse()
       },
       Executable {
         assertThat(aktivtVedtakSomSkalOppdateres.opprettetTimestamp).`as`("opprettetTimestamp").isEqualTo(dateTimeNow.minusYears(1))
@@ -229,7 +228,7 @@ internal class BehandleHendelseServiceMockTest {
   @Suppress("NonAsciiCharacters")
   fun `skal slette aktivt vedtak fordi resultatKode i VedtakHendelse er AVSLAG`() {
 
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagFinnAktivtVedtakDto())
+    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
     doNothing().whenever(aktivtVedtakServiceMock).slettAktivtVedtak(MockitoHelper.capture(slettAktivtVedtakCaptor))
 
     // Oppretter ny hendelse
@@ -546,8 +545,8 @@ internal class BehandleHendelseServiceMockTest {
       emptyList()
     )
 
-  private fun lagFinnAktivtVedtakDto() =
-    FinnAktivtVedtakDto(
+  private fun lagAktivtVedtakBo() =
+    AktivtVedtakBo(
       aktivtVedtakId = aktivtVedtakId,
       vedtakId = vedtakId,
       sakId = sakId,
@@ -570,27 +569,27 @@ internal class BehandleHendelseServiceMockTest {
 
   private companion object {
 
-    val vedtakId = 1
+    const val vedtakId = 1
     val vedtakType = VedtakType.MANUELT
-    val sakId = "SAK-001"
-    val kravhaverId = "54321"
-    val mottakerId = "24680"
-    val belop1 = BigDecimal.valueOf(100)
-    val valutakode1 = "NOK"
-    val resultatkode1 = "RESULTATKODE1"
-    val dateNow = LocalDate.now()
-    val dateTimeNow = LocalDateTime.now()
+    const val sakId = "SAK-001"
+    const val kravhaverId = "54321"
+    const val mottakerId = "24680"
+    val belop1: BigDecimal = BigDecimal.valueOf(100)
+    const val valutakode1 = "NOK"
+    const val resultatkode1 = "RESULTATKODE1"
+    val dateNow: LocalDate = LocalDate.now()
+    val dateTimeNow: LocalDateTime = LocalDateTime.now()
     val sivilstandkode1 = SivilstandKode.GIFT
     val bostatuskode1 = BostatusKode.MED_FORELDRE
-    val fodselsdato = "2006-02-01"
+    const val fodselsdato = "2006-02-01"
 
-    val aktivtVedtakId = 1
-    val soknadsbarnId = "54321"
-    val antallBarn = 0
+    const val aktivtVedtakId = 1
+    const val soknadsbarnId = "54321"
+    const val antallBarn = 0
 
-    val belop2 = BigDecimal.valueOf(200)
-    val valutakode2 = "EUR"
-    val resultatkode2 = "RESULTATKODE2"
+    val belop2: BigDecimal = BigDecimal.valueOf(200)
+    const val valutakode2 = "EUR"
+    const val resultatkode2 = "RESULTATKODE2"
     val sivilstandkode2 = SivilstandKode.SAMBOER
     val bostatuskode2 = BostatusKode.ALENE
   }

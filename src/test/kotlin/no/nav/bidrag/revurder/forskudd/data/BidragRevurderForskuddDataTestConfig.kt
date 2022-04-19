@@ -20,8 +20,7 @@ class BidragRevurderForskuddDataTestConfig {
 
   @Bean
   fun testRestTemplate(testRestTemplate: TestRestTemplate?): HttpHeaderTestRestTemplate? {
-    val httpHeaderTestRestTemplate = HttpHeaderTestRestTemplate(testRestTemplate)
-    return httpHeaderTestRestTemplate
+    return HttpHeaderTestRestTemplate(testRestTemplate)
   }
 
   @Bean

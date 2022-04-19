@@ -20,58 +20,58 @@ data class AktivtVedtak(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(nullable = false, name = "aktivt_vedtak_id")
-  val aktivtVedtakId: Int = 0,
+  val aktivtVedtakId: Int,
 
   @Column(nullable = false, name = "vedtak_id")
-  val vedtakId: Int = 0,
+  val vedtakId: Int,
 
   @Column(nullable = true, name = "sak_id")
-  val sakId: String? = "",
+  val sakId: String?,
 
   @Column(nullable = false, name = "soknadsbarn_id")
-  val soknadsbarnId: String = "",
+  val soknadsbarnId: String,
 
   @Column(nullable = false, name = "mottaker_id")
-  val mottakerId: String = "",
+  val mottakerId: String,
 
   @Column(nullable = false, name = "vedtak_dato_siste_vedtak")
-  val vedtakDatoSisteVedtak: LocalDate = LocalDate.now(),
+  val vedtakDatoSisteVedtak: LocalDate,
 
   @Column(nullable = false, name = "vedtak_dato_siste_manuelle_vedtak")
-  val vedtakDatoSisteManuelleVedtak: LocalDate = LocalDate.now(),
+  val vedtakDatoSisteManuelleVedtak: LocalDate,
 
   @Column(nullable = false, name = "vedtak_type")
-  val vedtakType: String = "",
+  val vedtakType: String,
 
   @Column(nullable = false, name = "belop")
-  val belop: BigDecimal = BigDecimal.ZERO,
+  val belop: BigDecimal,
 
   @Column(nullable = false, name = "valutakode")
-  val valutakode: String = "",
+  val valutakode: String,
 
   @Column(nullable = false, name = "resultatkode")
-  val resultatkode: String = "",
+  val resultatkode: String,
 
   @Column(nullable = false, name = "mottaker_sivilstand_siste_manuelle_vedtak")
-  val mottakerSivilstandSisteManuelleVedtak: String = "",
+  val mottakerSivilstandSisteManuelleVedtak: String,
 
   @Column(nullable = false, name = "mottaker_antall_barn_siste_manuelle_vedtak")
-  val mottakerAntallBarnSisteManuelleVedtak: Int = 0,
+  val mottakerAntallBarnSisteManuelleVedtak: Int,
 
   @Column(nullable = false, name = "soknadsbarn_bostedsstatus")
-  val soknadsbarnBostedsstatus: String = "",
+  val soknadsbarnBostedsstatus: String,
 
   @Column(nullable = false, name = "soknadsbarn_fodselsdato")
-  val soknadsbarnFodselsdato: LocalDate = LocalDate.now(),
+  val soknadsbarnFodselsdato: LocalDate,
 
   @Column(nullable = false, name = "soknadsbarn_har_unntakskode")
-  val soknadsbarnHarUnntakskode: Boolean = false,
+  val soknadsbarnHarUnntakskode: Boolean,
 
   @Column(nullable = false, name = "opprettet_timestamp")
-  val opprettetTimestamp: LocalDateTime = LocalDateTime.now(),
+  val opprettetTimestamp: LocalDateTime,
 
   @Column(nullable = true, name = "sist_endret_timestamp")
-  val sistEndretTimestamp: LocalDateTime? = LocalDateTime.now()
+  val sistEndretTimestamp: LocalDateTime?
 )
 
 fun AktivtVedtak.toAktivtVedtakBo() = with(::AktivtVedtakBo) {
