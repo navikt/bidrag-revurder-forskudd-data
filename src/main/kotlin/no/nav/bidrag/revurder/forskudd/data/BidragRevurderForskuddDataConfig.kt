@@ -4,6 +4,7 @@ import no.nav.bidrag.behandling.felles.dto.vedtak.VedtakClient
 import no.nav.bidrag.commons.CorrelationId
 import no.nav.bidrag.commons.ExceptionLogger
 import no.nav.bidrag.commons.security.api.EnableSecurityConfiguration
+import no.nav.bidrag.commons.security.service.SecurityTokenService
 import no.nav.bidrag.commons.web.CorrelationIdFilter
 import no.nav.bidrag.commons.web.HttpHeaderRestTemplate
 import no.nav.bidrag.revurder.forskudd.data.client.VedtakClientImpl
@@ -56,12 +57,12 @@ class BidragRevurderForskuddDataConfig {
   fun vedtakClient(
     @Value("\${VEDTAK_URL}") url: String,
     restTemplate: HttpHeaderRestTemplate,
-//    securityTokenService: SecurityTokenService,
+    securityTokenService: SecurityTokenService,
     exceptionLogger: ExceptionLogger
   ): VedtakClient {
     LOGGER.info("Url satt i config: $url")
     restTemplate.uriTemplateHandler = RootUriTemplateHandler(url)
-//    restTemplate.interceptors.add(securityTokenService.serviceUserAuthTokenInterceptor("bidragvedtak"))
+    restTemplate.interceptors.add(securityTokenService.serviceUserAuthTokenInterceptor("bidragvedtak"))
     return VedtakClientImpl(restTemplate)
   }
 }
