@@ -9,6 +9,7 @@ import no.nav.bidrag.revurder.forskudd.data.PROFILE_TEST
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelse
 import no.nav.bidrag.revurder.forskudd.data.model.VedtakHendelsePeriode
 import no.nav.bidrag.revurder.forskudd.data.persistence.repository.AktivtVedtakRepository
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +28,7 @@ import java.time.LocalDateTime
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = [BidragRevurderForskuddDataTest::class])
 @AutoConfigureWireMock(port = 8096)
 @ActiveProfiles(PROFILE_TEST)
+@EnableMockOAuth2Server
 internal class BehandleHendelseServiceTest {
 
   @Autowired
