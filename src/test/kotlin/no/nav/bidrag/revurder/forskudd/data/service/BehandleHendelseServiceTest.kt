@@ -43,7 +43,7 @@ internal class BehandleHendelseServiceTest {
   @BeforeEach
   fun `init`() {
     // Sletter alle forekomster
-    aktivtVedtakRepository. deleteAll()
+    aktivtVedtakRepository.deleteAll()
   }
 
   @Test

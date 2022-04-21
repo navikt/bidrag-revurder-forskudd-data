@@ -38,6 +38,13 @@ spec:
       memory: 1024Mi
   ingresses:
     - {{ ingress }}
+  env:
+    - name: TOPIC_VEDTAK
+      value: {{ kafka-topic-vedtak }}
+    - name: VEDTAK_URL
+      value: https://{{ azure.vedtak_url }}
+    - name: VEDTAK_SCOPE
+      value: https://{{ azure.vedtak_scope }}
   gcp:
     sqlInstances:
       - name: {{ database.dbname }}
@@ -46,11 +53,3 @@ spec:
         databases:
           - name: {{ database.dbname }}
             envVarPrefix: DB
-  env:
-    - name: TOPIC_VEDTAK
-      value: {{ kafka-topic-vedtak }}
-    - name: VEDTAK_URL
-      value: https://{{ azure.vedtak_url }}
-    - name: VEDTAK_SCOPE
-      value: https://{{ azure.vedtak_scope }}
-
