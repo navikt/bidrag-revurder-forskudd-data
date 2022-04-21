@@ -112,6 +112,12 @@
       <version>2.13.1</version>
     </dependency>
 
+    <!-- Apache -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+
     <!-- NAV -->
     <dependency>
       <groupId>no.nav.bidrag</groupId>
