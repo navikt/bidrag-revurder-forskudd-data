@@ -44,7 +44,7 @@ spec:
     - name: VEDTAK_URL
       value: https://{{ azure.vedtak_url }}
     - name: VEDTAK_SCOPE
-      value: https://{{ azure.vedtak_scope }}
+      value: {{ azure.vedtak_scope }}
   gcp:
     sqlInstances:
       - name: {{ database.dbname }}
