@@ -31,116 +31,115 @@ import java.time.LocalDateTime
 @EnableMockOAuth2Server
 internal class BehandleHendelseServiceTest {
 
-  @Autowired
-  private lateinit var behandleHendelseService: DefaultBehandleHendelseService
+    @Autowired
+    private lateinit var behandleHendelseService: DefaultBehandleHendelseService
 
-  @Autowired
-  private lateinit var persistenceService: PersistenceService
+    @Autowired
+    private lateinit var persistenceService: PersistenceService
 
-  @Autowired
-  private lateinit var aktivtVedtakRepository: AktivtVedtakRepository
+    @Autowired
+    private lateinit var aktivtVedtakRepository: AktivtVedtakRepository
 
-  @BeforeEach
-  fun `init`() {
-    // Sletter alle forekomster
-    aktivtVedtakRepository. deleteAll()
-  }
+    @BeforeEach
+    fun `init`() {
+        // Sletter alle forekomster
+        aktivtVedtakRepository.deleteAll()
+    }
 
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal opprette nytt aktivt vedtak basert på data fra VedtakHendelse`() {
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = resultatkode2
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal opprette nytt aktivt vedtak basert på data fra VedtakHendelse`() {
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = resultatkode2
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                )
+            )
         )
-      )
-    )
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
 
-    // Sjekker at nytt aktivt vedtak har blitt opprettet
-    val finnAktivtVedtakOpprettetBasertPaaKravhaver = persistenceService.finnAktivtVedtak(kravhaverId)
-    // Finner aktivt vedtak basert på id
-    val finnAktivtVedtakOpprettetBasertPaaId = persistenceService.finnAktivtVedtakFraId(finnAktivtVedtakOpprettetBasertPaaKravhaver!!.aktivtVedtakId)
+        // Sjekker at nytt aktivt vedtak har blitt opprettet
+        val finnAktivtVedtakOpprettetBasertPaaKravhaver = persistenceService.finnAktivtVedtak(kravhaverId)
+        // Finner aktivt vedtak basert på id
+        val finnAktivtVedtakOpprettetBasertPaaId = persistenceService.finnAktivtVedtakFraId(finnAktivtVedtakOpprettetBasertPaaKravhaver!!.aktivtVedtakId)
 
-    assertAll(
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver).isNotNull() },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaId).isNotNull() },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver).isEqualTo(finnAktivtVedtakOpprettetBasertPaaId) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.sakId).`as`("sakId").isEqualTo(sakId) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
-      Executable {
-        assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
-      },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.belop.compareTo(belop1)).`as`("belop").isEqualTo(0) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.valutakode).`as`("valutakode").isEqualTo(valutakode1) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.resultatkode).`as`("resultatkode").isEqualTo(resultatkode1) },
-      Executable {
-        assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
-          .isEqualTo(sivilstandkode1)
-      },
-      Executable {
-        assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isZero()
-      },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
-      Executable {
-        assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isFalse()
-      },
-      Executable {
-        assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
-      },
-      Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.sistEndretTimestamp).`as`("soknadsbarnFodselsdato").isNull() }
-    )
-  }
+        assertAll(
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver).isNotNull() },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaId).isNotNull() },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver).isEqualTo(finnAktivtVedtakOpprettetBasertPaaId) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.sakId).`as`("sakId").isEqualTo(sakId) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
+            Executable {
+                assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
+            },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.belop.compareTo(belop1)).`as`("belop").isEqualTo(0) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.valutakode).`as`("valutakode").isEqualTo(valutakode1) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.resultatkode).`as`("resultatkode").isEqualTo(resultatkode1) },
+            Executable {
+                assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
+                    .isEqualTo(sivilstandkode1)
+            },
+            Executable {
+                assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
+                    .isZero()
+            },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
+            Executable {
+                assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
+                    .isFalse()
+            },
+            Executable {
+                assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
+            },
+            Executable { assertThat(finnAktivtVedtakOpprettetBasertPaaKravhaver.sistEndretTimestamp).`as`("soknadsbarnFodselsdato").isNull() }
+        )
+    }
 
-  private companion object {
+    private companion object {
 
-    const val vedtakId = 1
-    val vedtakType = VedtakType.MANUELT
-    const val sakId = "SAK-001"
-    const val kravhaverId = "54321"
-    const val mottakerId = "24680"
-    val belop1: BigDecimal = BigDecimal.valueOf(100)
-    const val valutakode1 = "NOK"
-    const val resultatkode1 = "RESULTATKODE1"
-    val dateNow: LocalDate = LocalDate.now()
-    val dateTimeNow: LocalDateTime = LocalDateTime.now()
-    val sivilstandkode1 = SivilstandKode.GIFT
-    val bostatuskode1 = BostatusKode.MED_FORELDRE
-    const val fodselsdato = "2006-02-01"
+        const val vedtakId = 1
+        val vedtakType = VedtakType.MANUELT
+        const val sakId = "SAK-001"
+        const val kravhaverId = "54321"
+        const val mottakerId = "24680"
+        val belop1: BigDecimal = BigDecimal.valueOf(100)
+        const val valutakode1 = "NOK"
+        const val resultatkode1 = "RESULTATKODE1"
+        val dateNow: LocalDate = LocalDate.now()
+        val dateTimeNow: LocalDateTime = LocalDateTime.now()
+        val sivilstandkode1 = SivilstandKode.GIFT
+        val bostatuskode1 = BostatusKode.MED_FORELDRE
+        const val fodselsdato = "2006-02-01"
 
-    val belop2: BigDecimal = BigDecimal.valueOf(200)
-    const val valutakode2 = "EUR"
-    const val resultatkode2 = "RESULTATKODE2"
-  }
+        val belop2: BigDecimal = BigDecimal.valueOf(200)
+        const val valutakode2 = "EUR"
+        const val resultatkode2 = "RESULTATKODE2"
+    }
 }

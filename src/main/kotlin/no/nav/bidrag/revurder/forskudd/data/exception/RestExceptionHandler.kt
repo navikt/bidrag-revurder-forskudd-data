@@ -20,50 +20,49 @@ import org.springframework.web.client.RestTemplate
 @Component
 class RestExceptionHandler(private val exceptionLogger: ExceptionLogger) {
 
-  @ResponseBody
-  @ExceptionHandler(RestClientException::class)
-  protected fun handleRestClientException(e: RestClientException): ResponseEntity<*> {
-    exceptionLogger.logException(e, "RestExceptionHandler")
-    val feilmelding = "Restkall feilet!"
-    val headers = HttpHeaders()
-    headers.add(HttpHeaders.WARNING, feilmelding)
-    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ResponseEntity(e.message, headers, HttpStatus.SERVICE_UNAVAILABLE))
-  }
-
-  @ResponseBody
-  @ExceptionHandler(HttpClientErrorException::class, HttpServerErrorException::class)
-  protected fun handleHttpClientErrorException(e: HttpStatusCodeException): ResponseEntity<*> {
-    when (e) {
-      is HttpClientErrorException -> exceptionLogger.logException(e, "HttpClientErrorException")
-      is HttpServerErrorException -> exceptionLogger.logException(e, "HttpServerErrorException")
+    @ResponseBody
+    @ExceptionHandler(RestClientException::class)
+    protected fun handleRestClientException(e: RestClientException): ResponseEntity<*> {
+        exceptionLogger.logException(e, "RestExceptionHandler")
+        val feilmelding = "Restkall feilet!"
+        val headers = HttpHeaders()
+        headers.add(HttpHeaders.WARNING, feilmelding)
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ResponseEntity(e.message, headers, HttpStatus.SERVICE_UNAVAILABLE))
     }
-    return ResponseEntity(e.message, e.statusCode)
-  }
 
-  @ResponseBody
-  @ExceptionHandler(IllegalArgumentException::class)
-  protected fun handleIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<*> {
-    exceptionLogger.logException(e, "RestExceptionHandler")
-    val feilmelding = if (e.message == null || e.message!!.isBlank()) "Restkall feilet!" else e.message!!
-    val headers = HttpHeaders()
-    headers.add(HttpHeaders.WARNING, feilmelding)
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntity(feilmelding, headers, HttpStatus.BAD_REQUEST))
-  }
+    @ResponseBody
+    @ExceptionHandler(HttpClientErrorException::class, HttpServerErrorException::class)
+    protected fun handleHttpClientErrorException(e: HttpStatusCodeException): ResponseEntity<*> {
+        when (e) {
+            is HttpClientErrorException -> exceptionLogger.logException(e, "HttpClientErrorException")
+            is HttpServerErrorException -> exceptionLogger.logException(e, "HttpServerErrorException")
+        }
+        return ResponseEntity(e.message, e.statusCode)
+    }
+
+    @ResponseBody
+    @ExceptionHandler(IllegalArgumentException::class)
+    protected fun handleIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<*> {
+        exceptionLogger.logException(e, "RestExceptionHandler")
+        val feilmelding = if (e.message == null || e.message!!.isBlank()) "Restkall feilet!" else e.message!!
+        val headers = HttpHeaders()
+        headers.add(HttpHeaders.WARNING, feilmelding)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseEntity(feilmelding, headers, HttpStatus.BAD_REQUEST))
+    }
 }
 
-
 sealed class RestResponse<T> {
-  data class Success<T>(val body: T) : RestResponse<T>()
-  data class Failure<T>(val message: String?, val statusCode: HttpStatus, val restClientException: RestClientException) : RestResponse<T>()
+    data class Success<T>(val body: T) : RestResponse<T>()
+    data class Failure<T>(val message: String?, val statusCode: HttpStatus, val restClientException: RestClientException) : RestResponse<T>()
 }
 
 fun <T> RestTemplate.tryExchange(url: String, httpMethod: HttpMethod, httpEntity: HttpEntity<*>?, responseType: Class<T>, fallbackBody: T): RestResponse<T> {
-  return try {
-    val response = exchange(url, httpMethod, httpEntity, responseType)
-    RestResponse.Success(response.body ?: fallbackBody)
-  } catch (e: HttpClientErrorException) {
-    RestResponse.Failure("Message: ${e.message}", e.statusCode, e)
-  } catch (e: HttpServerErrorException) {
-    RestResponse.Failure("Message: ${e.message}", e.statusCode, e)
-  }
+    return try {
+        val response = exchange(url, httpMethod, httpEntity, responseType)
+        RestResponse.Success(response.body ?: fallbackBody)
+    } catch (e: HttpClientErrorException) {
+        RestResponse.Failure("Message: ${e.message}", e.statusCode, e)
+    } catch (e: HttpServerErrorException) {
+        RestResponse.Failure("Message: ${e.message}", e.statusCode, e)
+    }
 }

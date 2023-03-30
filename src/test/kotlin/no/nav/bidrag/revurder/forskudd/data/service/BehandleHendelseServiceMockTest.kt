@@ -39,564 +39,558 @@ import java.time.LocalDateTime
 @ExtendWith(MockitoExtension::class)
 internal class BehandleHendelseServiceMockTest {
 
-  @InjectMocks
-  private lateinit var behandleHendelseService: DefaultBehandleHendelseService
+    @InjectMocks
+    private lateinit var behandleHendelseService: DefaultBehandleHendelseService
 
-  @Mock
-  private lateinit var aktivtVedtakServiceMock: AktivtVedtakService
+    @Mock
+    private lateinit var aktivtVedtakServiceMock: AktivtVedtakService
 
-  @Mock
-  private lateinit var vedtakClientMock: VedtakClient
+    @Mock
+    private lateinit var vedtakClientMock: VedtakClient
 
-  @Captor
-  private lateinit var aktivtVedtakCaptor: ArgumentCaptor<AktivtVedtakBo>
+    @Captor
+    private lateinit var aktivtVedtakCaptor: ArgumentCaptor<AktivtVedtakBo>
 
-  @Captor
-  private lateinit var slettAktivtVedtakCaptor: ArgumentCaptor<Int>
+    @Captor
+    private lateinit var slettAktivtVedtakCaptor: ArgumentCaptor<Int>
 
-  private val mapper = ObjectMapper()
+    private val mapper = ObjectMapper()
 
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal opprette nytt aktivt vedtak basert på data fra VedtakHendelse`() {
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal opprette nytt aktivt vedtak basert på data fra VedtakHendelse`() {
+        whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
+        whenever(aktivtVedtakServiceMock.opprettNyttAktivtVedtak(MockitoHelper.capture(aktivtVedtakCaptor))).thenReturn(1)
 
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
-    whenever(aktivtVedtakServiceMock.opprettNyttAktivtVedtak(MockitoHelper.capture(aktivtVedtakCaptor))).thenReturn(1)
+        // Simulerer vedtak returnert fra bidrag-vedtak
+        whenever(vedtakClientMock.hentVedtak(any())).thenReturn(lagVedtakDtoNytt())
 
-    // Simulerer vedtak returnert fra bidrag-vedtak
-    whenever(vedtakClientMock.hentVedtak(any())).thenReturn(lagVedtakDtoNytt())
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = resultatkode2
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = resultatkode2
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                )
+            )
         )
-      )
-    )
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
 
-    // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.opprettNyttAktivtVedtak(nyttAktivtVedtak)
-    val nyttAktivtVedtakSomSkalOpprettes = aktivtVedtakCaptor.value
+        // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.opprettNyttAktivtVedtak(nyttAktivtVedtak)
+        val nyttAktivtVedtakSomSkalOpprettes = aktivtVedtakCaptor.value
 
-    verify(this.aktivtVedtakServiceMock, times(1)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(1)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
 
-    assertAll(
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes).isNotNull() },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.sakId).`as`("sakId").isEqualTo(sakId) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
-      Executable {
-        assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
-      },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.belop).`as`("belop").isEqualTo(belop1) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.valutakode).`as`("valutakode").isEqualTo(valutakode1) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.resultatkode).`as`("resultatkode").isEqualTo(resultatkode1) },
-      Executable {
-        assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
-          .isEqualTo(sivilstandkode1)
-      },
-      Executable {
-        assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isZero()
-      },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
-      Executable {
-        assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isFalse()
-      },
-      Executable {
-        assertThat(nyttAktivtVedtakSomSkalOpprettes.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
-      },
-      Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.sistEndretTimestamp).`as`("soknadsbarnFodselsdato").isNull() }
-    )
-  }
-
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal oppdatere aktivt vedtak basert på data fra VedtakHendelse`() {
-
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
-    whenever(aktivtVedtakServiceMock.oppdaterAktivtVedtak(MockitoHelper.capture(aktivtVedtakCaptor))).thenReturn(1)
-
-    // Simulerer vedtak returnert fra bidrag-vedtak
-    whenever(vedtakClientMock.hentVedtak(any())).thenReturn(lagVedtakDtoOppdatert())
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "TEST",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = resultatkode2
+        assertAll(
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes).isNotNull() },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.sakId).`as`("sakId").isEqualTo(sakId) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
+            Executable {
+                assertThat(nyttAktivtVedtakSomSkalOpprettes.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
+            },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.belop).`as`("belop").isEqualTo(belop1) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.valutakode).`as`("valutakode").isEqualTo(valutakode1) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.resultatkode).`as`("resultatkode").isEqualTo(resultatkode1) },
+            Executable {
+                assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
+                    .isEqualTo(sivilstandkode1)
+            },
+            Executable {
+                assertThat(nyttAktivtVedtakSomSkalOpprettes.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
+                    .isZero()
+            },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode1) },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
+            Executable {
+                assertThat(nyttAktivtVedtakSomSkalOpprettes.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
+                    .isFalse()
+            },
+            Executable {
+                assertThat(nyttAktivtVedtakSomSkalOpprettes.opprettetTimestamp.toLocalDate()).`as`("opprettetTimestamp").isEqualTo(LocalDate.now())
+            },
+            Executable { assertThat(nyttAktivtVedtakSomSkalOpprettes.sistEndretTimestamp).`as`("soknadsbarnFodselsdato").isNull() }
         )
-      )
-    )
+    }
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal oppdatere aktivt vedtak basert på data fra VedtakHendelse`() {
+        whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
+        whenever(aktivtVedtakServiceMock.oppdaterAktivtVedtak(MockitoHelper.capture(aktivtVedtakCaptor))).thenReturn(1)
 
-    // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.oppdaterEksisterendeAktivtVedtak(oppdatertAktivtVedtak)
-    val aktivtVedtakSomSkalOppdateres = aktivtVedtakCaptor.value
+        // Simulerer vedtak returnert fra bidrag-vedtak
+        whenever(vedtakClientMock.hentVedtak(any())).thenReturn(lagVedtakDtoOppdatert())
 
-    verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(1)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
-
-    assertAll(
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres).isNotNull() },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.sakId).`as`("sakId").isEqualTo(sakId) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
-      },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.belop).`as`("belop").isEqualTo(belop2) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.valutakode).`as`("valutakode").isEqualTo(valutakode2) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.resultatkode).`as`("resultatkode").isEqualTo(resultatkode2) },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
-          .isEqualTo(sivilstandkode2)
-      },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
-          .isZero()
-      },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode2) },
-      Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
-          .isFalse()
-      },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.opprettetTimestamp).`as`("opprettetTimestamp").isEqualTo(dateTimeNow.minusYears(1))
-      },
-      Executable {
-        assertThat(aktivtVedtakSomSkalOppdateres.sistEndretTimestamp!!.toLocalDate()).`as`("soknadsbarnFodselsdato").isEqualTo(LocalDate.now())
-      }
-    )
-  }
-
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal slette aktivt vedtak fordi resultatKode i VedtakHendelse er AVSLAG`() {
-
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
-    doNothing().whenever(aktivtVedtakServiceMock).slettAktivtVedtak(MockitoHelper.capture(slettAktivtVedtakCaptor))
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "TEST",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = "AVSLAG"
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "TEST",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = resultatkode2
+                )
+            )
         )
-      )
-    )
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
 
-    // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.slettAktivtVedtak(id)
-    val aktivtVedtakSomSkalSlettes = slettAktivtVedtakCaptor.value
+        // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.oppdaterEksisterendeAktivtVedtak(oppdatertAktivtVedtak)
+        val aktivtVedtakSomSkalOppdateres = aktivtVedtakCaptor.value
 
-    verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(1)).slettAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(1)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
 
-    assertAll(
-      Executable { assertThat(aktivtVedtakSomSkalSlettes).isNotNull() },
-      Executable { assertThat(aktivtVedtakSomSkalSlettes).isEqualTo(vedtakId) }
-    )
-  }
-
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal ikke gjøre noe fordi aktivt vedtak ikke finnes og resultatKode i VedtakHendelse er AVSLAG`() {
-
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "TEST",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = "AVSLAG"
+        assertAll(
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres).isNotNull() },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.vedtakId).`as`("vedtakId").isEqualTo(vedtakId) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.sakId).`as`("sakId").isEqualTo(sakId) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnId).`as`("soknadsbarnId").isEqualTo(kravhaverId) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.mottakerId).`as`("mottakerId").isEqualTo(mottakerId) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.vedtakDatoSisteVedtak).`as`("vedtakDatoSisteVedtak").isEqualTo(dateNow) },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.vedtakDatoSisteManuelleVedtak).`as`("vedtakDatoSisteManuelleVedtak").isEqualTo(dateNow)
+            },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.belop).`as`("belop").isEqualTo(belop2) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.valutakode).`as`("valutakode").isEqualTo(valutakode2) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.resultatkode).`as`("resultatkode").isEqualTo(resultatkode2) },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.mottakerSivilstandSisteManuelleVedtak).`as`("mottakerSivilstandSisteManuelleVedtak")
+                    .isEqualTo(sivilstandkode2)
+            },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.mottakerAntallBarnSisteManuelleVedtak).`as`("mottakerAntallBarnSisteManuelleVedtak")
+                    .isZero()
+            },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnBostedsstatus).`as`("soknadsbarnBostedsstatus").isEqualTo(bostatuskode2) },
+            Executable { assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnFodselsdato).`as`("soknadsbarnFodselsdato").isEqualTo(fodselsdato) },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.soknadsbarnHarUnntakskode).`as`("soknadsbarnHarUnntakskode")
+                    .isFalse()
+            },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.opprettetTimestamp).`as`("opprettetTimestamp").isEqualTo(dateTimeNow.minusYears(1))
+            },
+            Executable {
+                assertThat(aktivtVedtakSomSkalOppdateres.sistEndretTimestamp!!.toLocalDate()).`as`("soknadsbarnFodselsdato").isEqualTo(LocalDate.now())
+            }
         )
-      )
-    )
+    }
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal slette aktivt vedtak fordi resultatKode i VedtakHendelse er AVSLAG`() {
+        whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(lagAktivtVedtakBo())
+        doNothing().whenever(aktivtVedtakServiceMock).slettAktivtVedtak(MockitoHelper.capture(slettAktivtVedtakCaptor))
 
-    verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
-  }
-
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal ikke gjøre noe fordi aktivt vedtak ikke finnes og vedtakType i VedtakHendelse er noe annet enn MANUELT`() {
-
-    whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
-
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = VedtakType.INDEKSREGULERING,
-      stonadType = StonadType.FORSKUDD,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "TEST",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = resultatkode2
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "TEST",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = "AVSLAG"
+                )
+            )
         )
-      )
-    )
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
 
-    verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
-  }
+        // Henter nytt aktivt vedtak som ville vært input til aktivtVedtakService.slettAktivtVedtak(id)
+        val aktivtVedtakSomSkalSlettes = slettAktivtVedtakCaptor.value
 
-  @Test
-  @Suppress("NonAsciiCharacters")
-  fun `skal ikke gjøre noe fordi stonadType i VedtakHendelse er noe annet enn FORSKUDD`() {
+        verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(1)).slettAktivtVedtak(any())
 
-    // Oppretter ny hendelse
-    val nyHendelse = VedtakHendelse(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      stonadType = StonadType.BIDRAG,
-      sakId = sakId,
-      skyldnerId = "12345",
-      kravhaverId = kravhaverId,
-      mottakerId = mottakerId,
-      opprettetAv = "TEST",
-      opprettetTimestamp = dateTimeNow,
-      periodeListe = listOf(
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
-          periodeTil = dateNow.withDayOfMonth(1),
-          belop = belop1,
-          valutakode = valutakode1,
-          resultatkode = resultatkode1
-        ),
-        VedtakHendelsePeriode(
-          periodeFom = dateNow.withDayOfMonth(1),
-          periodeTil = null,
-          belop = belop2,
-          valutakode = valutakode2,
-          resultatkode = resultatkode2
+        assertAll(
+            Executable { assertThat(aktivtVedtakSomSkalSlettes).isNotNull() },
+            Executable { assertThat(aktivtVedtakSomSkalSlettes).isEqualTo(vedtakId) }
         )
-      )
-    )
+    }
 
-    // Kaller BehandleHendelseService
-    behandleHendelseService.behandleHendelse(nyHendelse)
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal ikke gjøre noe fordi aktivt vedtak ikke finnes og resultatKode i VedtakHendelse er AVSLAG`() {
+        whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
 
-    verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
-    verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
-  }
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "TEST",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = "AVSLAG"
+                )
+            )
+        )
 
-  private fun lagVedtakDtoNytt() =
-    VedtakDto(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      opprettetAv = "",
-      vedtakDato = dateNow,
-      enhetId = "",
-      opprettetTimestamp = dateTimeNow,
-      listOf(
-        GrunnlagDto(
-          grunnlagId = 1,
-          referanse = "Mottatt_Sivilstand",
-          type = GrunnlagType.SIVILSTAND,
-          innhold = mapper.readTree(
-            """{
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
+
+        verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
+    }
+
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal ikke gjøre noe fordi aktivt vedtak ikke finnes og vedtakType i VedtakHendelse er noe annet enn MANUELT`() {
+        whenever(aktivtVedtakServiceMock.finnAktivtVedtak(any())).thenReturn(null)
+
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = VedtakType.INDEKSREGULERING,
+            stonadType = StonadType.FORSKUDD,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "TEST",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = resultatkode2
+                )
+            )
+        )
+
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
+
+        verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
+    }
+
+    @Test
+    @Suppress("NonAsciiCharacters")
+    fun `skal ikke gjøre noe fordi stonadType i VedtakHendelse er noe annet enn FORSKUDD`() {
+        // Oppretter ny hendelse
+        val nyHendelse = VedtakHendelse(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            stonadType = StonadType.BIDRAG,
+            sakId = sakId,
+            skyldnerId = "12345",
+            kravhaverId = kravhaverId,
+            mottakerId = mottakerId,
+            opprettetAv = "TEST",
+            opprettetTimestamp = dateTimeNow,
+            periodeListe = listOf(
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.minusYears(1).withDayOfMonth(1),
+                    periodeTil = dateNow.withDayOfMonth(1),
+                    belop = belop1,
+                    valutakode = valutakode1,
+                    resultatkode = resultatkode1
+                ),
+                VedtakHendelsePeriode(
+                    periodeFom = dateNow.withDayOfMonth(1),
+                    periodeTil = null,
+                    belop = belop2,
+                    valutakode = valutakode2,
+                    resultatkode = resultatkode2
+                )
+            )
+        )
+
+        // Kaller BehandleHendelseService
+        behandleHendelseService.behandleHendelse(nyHendelse)
+
+        verify(this.aktivtVedtakServiceMock, times(0)).opprettNyttAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).oppdaterAktivtVedtak(any())
+        verify(this.aktivtVedtakServiceMock, times(0)).slettAktivtVedtak(any())
+    }
+
+    private fun lagVedtakDtoNytt() =
+        VedtakDto(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            opprettetAv = "",
+            vedtakDato = dateNow,
+            enhetId = "",
+            opprettetTimestamp = dateTimeNow,
+            listOf(
+                GrunnlagDto(
+                    grunnlagId = 1,
+                    referanse = "Mottatt_Sivilstand",
+                    type = GrunnlagType.SIVILSTAND,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.BIDRAGSMOTTAKER}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "sivilstandKode": "$sivilstandkode1"
       }"""
-          )
-        ),
-        GrunnlagDto(
-          grunnlagId = 2,
-          referanse = "Mottatt_Bostatus",
-          type = GrunnlagType.BOSTATUS,
-          innhold = mapper.readTree(
-            """{
+                    )
+                ),
+                GrunnlagDto(
+                    grunnlagId = 2,
+                    referanse = "Mottatt_Bostatus",
+                    type = GrunnlagType.BOSTATUS,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "bostatusKode": "$bostatuskode1"
       }"""
-          )
-        ),
-        GrunnlagDto(
-          grunnlagId = 3,
-          referanse = "Mottatt_Barn",
-          type = GrunnlagType.BARN,
-          innhold = mapper.readTree(
-            """{
+                    )
+                ),
+                GrunnlagDto(
+                    grunnlagId = 3,
+                    referanse = "Mottatt_Barn",
+                    type = GrunnlagType.BARN,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "fodselsdato": "$fodselsdato"
       }"""
-          )
-        ),
-      ),
-      listOf(
-        StonadsendringDto(
-          stonadType = StonadType.FORSKUDD,
-          sakId = "SAK-001",
-          behandlingId = "",
-          skyldnerId = "12345",
-          kravhaverId = "54321",
-          mottakerId = "24680",
-          listOf(
-            VedtakPeriodeDto(
-              periodeFomDato = LocalDate.now(),
-              periodeTilDato = null,
-              belop = BigDecimal.ZERO,
-              valutakode = "NOK",
-              resultatkode = "RESULTAT",
-              grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
-            )
-          )
+                    )
+                )
+            ),
+            listOf(
+                StonadsendringDto(
+                    stonadType = StonadType.FORSKUDD,
+                    sakId = "SAK-001",
+                    behandlingId = "",
+                    skyldnerId = "12345",
+                    kravhaverId = "54321",
+                    mottakerId = "24680",
+                    listOf(
+                        VedtakPeriodeDto(
+                            periodeFomDato = LocalDate.now(),
+                            periodeTilDato = null,
+                            belop = BigDecimal.ZERO,
+                            valutakode = "NOK",
+                            resultatkode = "RESULTAT",
+                            grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
+                        )
+                    )
+                )
+            ),
+            emptyList(),
+            emptyList()
         )
-      ),
-      emptyList(),
-      emptyList()
-    )
 
-  private fun lagVedtakDtoOppdatert() =
-    VedtakDto(
-      vedtakId = vedtakId,
-      vedtakType = vedtakType,
-      opprettetAv = "",
-      vedtakDato = dateNow,
-      enhetId = "",
-      opprettetTimestamp = dateTimeNow,
-      listOf(
-        GrunnlagDto(
-          grunnlagId = 1,
-          referanse = "Mottatt_Sivilstand",
-          type = GrunnlagType.SIVILSTAND,
-          innhold = mapper.readTree(
-            """{
+    private fun lagVedtakDtoOppdatert() =
+        VedtakDto(
+            vedtakId = vedtakId,
+            vedtakType = vedtakType,
+            opprettetAv = "",
+            vedtakDato = dateNow,
+            enhetId = "",
+            opprettetTimestamp = dateTimeNow,
+            listOf(
+                GrunnlagDto(
+                    grunnlagId = 1,
+                    referanse = "Mottatt_Sivilstand",
+                    type = GrunnlagType.SIVILSTAND,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.BIDRAGSMOTTAKER}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "sivilstandKode": "$sivilstandkode2"
       }"""
-          )
-        ),
-        GrunnlagDto(
-          grunnlagId = 2,
-          referanse = "Mottatt_Bostatus",
-          type = GrunnlagType.BOSTATUS,
-          innhold = mapper.readTree(
-            """{
+                    )
+                ),
+                GrunnlagDto(
+                    grunnlagId = 2,
+                    referanse = "Mottatt_Bostatus",
+                    type = GrunnlagType.BOSTATUS,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "datoFom": "$dateNow",
         "datoTil": null,
         "bostatusKode": "$bostatuskode2"
       }"""
-          )
-        ),
-        GrunnlagDto(
-          grunnlagId = 3,
-          referanse = "Mottatt_Barn",
-          type = GrunnlagType.BARN,
-          innhold = mapper.readTree(
-            """{
+                    )
+                ),
+                GrunnlagDto(
+                    grunnlagId = 3,
+                    referanse = "Mottatt_Barn",
+                    type = GrunnlagType.BARN,
+                    innhold = mapper.readTree(
+                        """{
         "rolle": "${Rolle.SOKNADSBARN}",
         "fodselsdato": "$fodselsdato"
       }"""
-          )
-        ),
-      ),
-      listOf(
-        StonadsendringDto(
-          stonadType = StonadType.FORSKUDD,
-          sakId = "SAK-001",
-          behandlingId = "",
-          skyldnerId = "12345",
-          kravhaverId = "54321",
-          mottakerId = "24680",
-          listOf(
-            VedtakPeriodeDto(
-              periodeFomDato = LocalDate.now(),
-              periodeTilDato = null,
-              belop = BigDecimal.ZERO,
-              valutakode = "NOK",
-              resultatkode = "RESULTAT",
-              grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
-            )
-          )
+                    )
+                )
+            ),
+            listOf(
+                StonadsendringDto(
+                    stonadType = StonadType.FORSKUDD,
+                    sakId = "SAK-001",
+                    behandlingId = "",
+                    skyldnerId = "12345",
+                    kravhaverId = "54321",
+                    mottakerId = "24680",
+                    listOf(
+                        VedtakPeriodeDto(
+                            periodeFomDato = LocalDate.now(),
+                            periodeTilDato = null,
+                            belop = BigDecimal.ZERO,
+                            valutakode = "NOK",
+                            resultatkode = "RESULTAT",
+                            grunnlagReferanseListe = listOf("Mottatt_Sivilstand", "Mottatt_Bostatus", "Mottatt_Barn")
+                        )
+                    )
+                )
+            ),
+            emptyList(),
+            emptyList()
         )
-      ),
-      emptyList(),
-      emptyList()
-    )
 
-  private fun lagAktivtVedtakBo() =
-    AktivtVedtakBo(
-      aktivtVedtakId = aktivtVedtakId,
-      vedtakId = vedtakId,
-      sakId = sakId,
-      soknadsbarnId = soknadsbarnId,
-      mottakerId = mottakerId,
-      vedtakDatoSisteVedtak = dateNow.minusYears(1),
-      vedtakDatoSisteManuelleVedtak = dateNow.minusYears(1),
-      vedtakType = vedtakType,
-      belop = belop1,
-      valutakode = valutakode1,
-      resultatkode = resultatkode1,
-      mottakerSivilstandSisteManuelleVedtak = sivilstandkode1,
-      mottakerAntallBarnSisteManuelleVedtak = antallBarn,
-      soknadsbarnBostedsstatus = bostatuskode1,
-      soknadsbarnFodselsdato = LocalDate.parse(fodselsdato),
-      soknadsbarnHarUnntakskode = false,
-      opprettetTimestamp = dateTimeNow.minusYears(1),
-      sistEndretTimestamp = null
-    )
+    private fun lagAktivtVedtakBo() =
+        AktivtVedtakBo(
+            aktivtVedtakId = aktivtVedtakId,
+            vedtakId = vedtakId,
+            sakId = sakId,
+            soknadsbarnId = soknadsbarnId,
+            mottakerId = mottakerId,
+            vedtakDatoSisteVedtak = dateNow.minusYears(1),
+            vedtakDatoSisteManuelleVedtak = dateNow.minusYears(1),
+            vedtakType = vedtakType,
+            belop = belop1,
+            valutakode = valutakode1,
+            resultatkode = resultatkode1,
+            mottakerSivilstandSisteManuelleVedtak = sivilstandkode1,
+            mottakerAntallBarnSisteManuelleVedtak = antallBarn,
+            soknadsbarnBostedsstatus = bostatuskode1,
+            soknadsbarnFodselsdato = LocalDate.parse(fodselsdato),
+            soknadsbarnHarUnntakskode = false,
+            opprettetTimestamp = dateTimeNow.minusYears(1),
+            sistEndretTimestamp = null
+        )
 
-  private companion object {
+    private companion object {
 
-    const val vedtakId = 1
-    val vedtakType = VedtakType.MANUELT
-    const val sakId = "SAK-001"
-    const val kravhaverId = "54321"
-    const val mottakerId = "24680"
-    val belop1: BigDecimal = BigDecimal.valueOf(100)
-    const val valutakode1 = "NOK"
-    const val resultatkode1 = "RESULTATKODE1"
-    val dateNow: LocalDate = LocalDate.now()
-    val dateTimeNow: LocalDateTime = LocalDateTime.now()
-    val sivilstandkode1 = SivilstandKode.GIFT
-    val bostatuskode1 = BostatusKode.MED_FORELDRE
-    const val fodselsdato = "2006-02-01"
+        const val vedtakId = 1
+        val vedtakType = VedtakType.MANUELT
+        const val sakId = "SAK-001"
+        const val kravhaverId = "54321"
+        const val mottakerId = "24680"
+        val belop1: BigDecimal = BigDecimal.valueOf(100)
+        const val valutakode1 = "NOK"
+        const val resultatkode1 = "RESULTATKODE1"
+        val dateNow: LocalDate = LocalDate.now()
+        val dateTimeNow: LocalDateTime = LocalDateTime.now()
+        val sivilstandkode1 = SivilstandKode.GIFT
+        val bostatuskode1 = BostatusKode.MED_FORELDRE
+        const val fodselsdato = "2006-02-01"
 
-    const val aktivtVedtakId = 1
-    const val soknadsbarnId = "54321"
-    const val antallBarn = 0
+        const val aktivtVedtakId = 1
+        const val soknadsbarnId = "54321"
+        const val antallBarn = 0
 
-    val belop2: BigDecimal = BigDecimal.valueOf(200)
-    const val valutakode2 = "EUR"
-    const val resultatkode2 = "RESULTATKODE2"
-    val sivilstandkode2 = SivilstandKode.SAMBOER
-    val bostatuskode2 = BostatusKode.ALENE
-  }
+        val belop2: BigDecimal = BigDecimal.valueOf(200)
+        const val valutakode2 = "EUR"
+        const val resultatkode2 = "RESULTATKODE2"
+        val sivilstandkode2 = SivilstandKode.SAMBOER
+        val bostatuskode2 = BostatusKode.ALENE
+    }
 
-  object MockitoHelper {
+    object MockitoHelper {
 
-    // use this in place of captor.capture() if you are trying to capture an argument that is not nullable
-    fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
-  }
+        // use this in place of captor.capture() if you are trying to capture an argument that is not nullable
+        fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+    }
 }

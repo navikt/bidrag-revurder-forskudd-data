@@ -18,21 +18,21 @@ const val PROFILE_TEST = "test"
 @Profile(PROFILE_TEST)
 class BidragRevurderForskuddDataTestConfig {
 
-  @Bean
-  fun testRestTemplate(testRestTemplate: TestRestTemplate?): HttpHeaderTestRestTemplate? {
-    return HttpHeaderTestRestTemplate(testRestTemplate)
-  }
+    @Bean
+    fun testRestTemplate(testRestTemplate: TestRestTemplate?): HttpHeaderTestRestTemplate? {
+        return HttpHeaderTestRestTemplate(testRestTemplate)
+    }
 
-  @Bean
-  fun vedtakHendelseListener(
-    jsonMapperService: JsonMapperService,
-    behandeHendelseService: BehandleHendelseService
-  ): VedtakHendelseListener = PojoVedtakHendelseListener(jsonMapperService, behandeHendelseService)
+    @Bean
+    fun vedtakHendelseListener(
+        jsonMapperService: JsonMapperService,
+        behandeHendelseService: BehandleHendelseService
+    ): VedtakHendelseListener = PojoVedtakHendelseListener(jsonMapperService, behandeHendelseService)
 
-  @Bean
-  fun wireMockOptions(): Options? {
-    val options = WireMockSpring.options()
-    options.port(8096)
-    return options
-  }
+    @Bean
+    fun wireMockOptions(): Options? {
+        val options = WireMockSpring.options()
+        options.port(8096)
+        return options
+    }
 }
