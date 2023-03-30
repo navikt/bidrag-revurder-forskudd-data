@@ -9,18 +9,18 @@ import org.springframework.stereotype.Service
 @Service
 class JsonMapperService(private val objectMapper: ObjectMapper) {
 
-  companion object {
-    @JvmStatic
-    private val LOGGER = LoggerFactory.getLogger(JsonMapperService::class.java)
-  }
-
-  fun mapHendelse(hendelse: String): VedtakHendelse {
-    return try {
-      objectMapper.readValue(hendelse, VedtakHendelse::class.java)
-    } finally {
-      LOGGER.debug("Leser hendelse: {}", hendelse)
+    companion object {
+        @JvmStatic
+        private val LOGGER = LoggerFactory.getLogger(JsonMapperService::class.java)
     }
-  }
 
-  fun readTree(hendelse: String): JsonNode = objectMapper.readTree(hendelse)
+    fun mapHendelse(hendelse: String): VedtakHendelse {
+        return try {
+            objectMapper.readValue(hendelse, VedtakHendelse::class.java)
+        } finally {
+            LOGGER.debug("Leser hendelse: {}", hendelse)
+        }
+    }
+
+    fun readTree(hendelse: String): JsonNode = objectMapper.readTree(hendelse)
 }
