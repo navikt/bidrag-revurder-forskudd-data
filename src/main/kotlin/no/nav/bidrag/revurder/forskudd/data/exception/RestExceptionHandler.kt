@@ -5,6 +5,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -53,7 +54,7 @@ class RestExceptionHandler(private val exceptionLogger: ExceptionLogger) {
 
 sealed class RestResponse<T> {
     data class Success<T>(val body: T) : RestResponse<T>()
-    data class Failure<T>(val message: String?, val statusCode: HttpStatus, val restClientException: RestClientException) : RestResponse<T>()
+    data class Failure<T>(val message: String?, val statusCode: HttpStatusCode, val restClientException: RestClientException) : RestResponse<T>()
 }
 
 fun <T> RestTemplate.tryExchange(url: String, httpMethod: HttpMethod, httpEntity: HttpEntity<*>?, responseType: Class<T>, fallbackBody: T): RestResponse<T> {

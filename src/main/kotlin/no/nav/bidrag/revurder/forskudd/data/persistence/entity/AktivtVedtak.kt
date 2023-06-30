@@ -1,5 +1,10 @@
 package no.nav.bidrag.revurder.forskudd.data.persistence.entity
 
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import no.nav.bidrag.behandling.felles.enums.BostatusKode
 import no.nav.bidrag.behandling.felles.enums.SivilstandKode
 import no.nav.bidrag.behandling.felles.enums.VedtakType
@@ -7,11 +12,6 @@ import no.nav.bidrag.revurder.forskudd.data.bo.AktivtVedtakBo
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
 import kotlin.reflect.full.memberProperties
 
 @Entity
