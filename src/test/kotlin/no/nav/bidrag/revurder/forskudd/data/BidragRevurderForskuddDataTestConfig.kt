@@ -19,7 +19,7 @@ const val PROFILE_TEST = "test"
 class BidragRevurderForskuddDataTestConfig {
 
     @Bean
-    fun testRestTemplate(testRestTemplate: TestRestTemplate?): HttpHeaderTestRestTemplate? {
+    fun testRestTemplate(testRestTemplate: TestRestTemplate): HttpHeaderTestRestTemplate? {
         return HttpHeaderTestRestTemplate(testRestTemplate)
     }
 
